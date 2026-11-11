@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel de Baixas</title>
+<style>
+:root{
+  --bg:#F4F8FB; --card:#FFFFFF; --soft:#F3F9FD; --ink:#2B2F33; --muted:#6B7378; --line:#E3E8EC;
+  --blue:#0A78D2; --blue-press:#0864B0; --sky:#41C1EE; --sky-soft:#E8F6FD;
+  --ok:#1E9E55; --ok-soft:#E3F5EA; --warn:#C8741F; --warn-soft:#FDF1E4; --err:#D63B3B; --err-soft:#FCE6E6;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:15px;line-height:1.4}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:16px}
+.lbox{background:var(--card);border:1.5px solid var(--sky);border-radius:16px;padding:28px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
+.lbox h1{margin:0;font-size:24px;color:#555}
+.lbox p{margin:0;color:var(--muted)}
+.lbox input{height:56px;border:2px solid var(--sky);border-radius:12px;background:var(--soft);font-size:26px;letter-spacing:.4em;text-align:center;font-weight:700}
+.lbox .msg{color:var(--err);font-weight:600;min-height:20px;font-size:14px}
+
+/* topo */
+.top{background:var(--card);border-bottom:1px solid var(--line)}
+.top .in{max-width:1200px;margin:0 auto;padding:12px 16px 0;display:flex;flex-direction:column;gap:8px}
+.tr{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tr h1{margin:0;font-size:22px;color:#555;flex:1}
+.tr .who{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:2px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 16px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
+.tabs button[aria-pressed="true"]{color:var(--blue);border-bottom-color:var(--blue)}
+.tabs .n{display:inline-block;min-width:22px;padding:0 6px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;margin-left:6px;text-align:center}
+
+main{max-width:1200px;margin:0 auto;padding:16px}
+.pane{display:none}
+.pane.on{display:block}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+@media (max-width:920px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+.box h2{margin:0 0 12px;font-size:16px;color:#555;text-transform:uppercase;letter-spacing:.04em}
+.sum{display:flex;flex-wrap:wrap;gap:6px 24px;margin-bottom:12px;color:var(--muted)}
+.sum b{font-size:24px;color:var(--ink);margin-right:4px}
+.sum .w b{color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chips button{border:1.5px solid var(--sky);background:var(--card);color:var(--blue);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600}
+.chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:8px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+td.r,th.r{text-align:right}
+tr.nc td{background:var(--warn-soft)}
+tr.nc td:first-child{box-shadow:inset 4px 0 0 var(--warn)}
+tr.ask td{background:var(--err-soft)}
+.small{font-size:12px;color:var(--muted)}
+.nw{white-space:nowrap}
+.lnk{border:0;background:none;font-weight:700;color:var(--blue);padding:4px 6px;font-size:13px;white-space:nowrap}
+.lnk.red{color:var(--err)}
+.lnk:disabled{opacity:.4;cursor:default}
+.pill{font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.off{background:var(--line);color:var(--muted)}
+.pill.imp{background:var(--blue);color:#fff}
+.txt{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.6;white-space:pre;overflow:auto;max-height:320px}
+.fn{font-size:12px;color:var(--muted);margin:8px 0 12px;word-break:break-all}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;font-size:15px;background:var(--blue);color:#fff;width:100%}
+.btn:hover{background:var(--blue-press)}
+.btn.sec{background:var(--card);color:var(--blue);border:1.5px solid var(--sky)}
+.btn.red{background:var(--err)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.confirm{background:var(--warn-soft);border-radius:12px;padding:12px;margin-top:10px;display:flex;flex-direction:column;gap:10px;font-size:14px}
+.confirm .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.warnbox{margin-top:12px;border-left:4px solid var(--warn);background:var(--warn-soft);border-radius:0 10px 10px 0;padding:10px 12px;font-size:14px}
+.infobox{margin-top:12px;border-left:4px solid var(--blue);background:var(--sky-soft);border-radius:0 10px 10px 0;padding:10px 12px;font-size:14px}
+.inl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.inl input{height:34px;border:1.5px solid var(--sky);border-radius:8px;padding:0 8px;font-size:14px;width:170px}
+.fld{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.fld label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.fld input{height:44px;border:1.5px solid var(--sky);border-radius:10px;padding:0 12px;font-size:16px}
+.code{font-size:40px;font-weight:800;letter-spacing:.2em;text-align:center;color:var(--blue);background:var(--sky-soft);border-radius:12px;padding:10px;margin-bottom:6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 18px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-weight:600}
+.empty{color:var(--muted);text-align:center;padding:26px 10px}
+.toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-8px);opacity:0;background:var(--blue);color:#fff;font-weight:700;padding:10px 18px;border-radius:999px;transition:.2s;pointer-events:none;z-index:9}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{background:var(--err)}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<section class="login" id="vLogin">
+  <form class="lbox" id="fLogin">
+    <h1>Painel de baixas</h1>
+    <p>Digite o PIN definido na planilha (menu Contagem → Definir PIN do painel).</p>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="8" aria-label="PIN">
+    <div class="msg" id="lMsg"></div>
+    <button class="btn" id="lGo" type="submit">Entrar</button>
+  </form>
+</section>
+
+<!-- PAINEL -->
+<div id="vApp" hidden>
+  <div class="top"><div class="in">
+    <div class="tr"><h1>Painel de baixas</h1><span class="who" id="upd"></span><button class="lnk" id="bRefresh">Atualizar</button><button class="lnk red" id="bSair">Sair</button></div>
+    <div class="tabs" role="group" aria-label="Seções">
+      <button data-t="pend" aria-pressed="true">Pendentes<span class="n" id="nPend">0</span></button>
+      <button data-t="lotes" aria-pressed="false">Lotes</button>
+      <button data-t="apar" aria-pressed="false">Aparelhos</button>
+      <button data-t="base" aria-pressed="false">Base de produtos</button>
+    </div>
+  </div></div>
+
+  <main>
+    <!-- PENDENTES -->
+    <section class="pane on" id="t-pend">
+      <div class="grid2">
+        <div class="box">
+          <div class="sum" id="pSum"></div>
+          <div class="chips" id="pChips"></div>
+          <div class="tw"><table>
+            <thead><tr><th>Data</th><th>Aparelho</th><th>Código</th><th>Descrição</th><th class="r">Qtd</th><th class="r">Ações</th></tr></thead>
+            <tbody id="pRows"></tbody>
+          </table></div>
+          <div id="ncWarn"></div>
+        </div>
+        <div class="box">
+          <h2>Prévia do TXT</h2>
+          <div class="txt" id="txt"></div>
+          <div class="fn" id="fname"></div>
+          <button class="btn" id="bLote">Gerar lote</button>
+          <div id="loteAsk"></div>
+          <div class="infobox">O lote inclui as leituras pendentes de <b>todos os aparelhos</b>, menos as não cadastradas. O filtro por aparelho serve só para conferir.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOTES -->
+    <section class="pane" id="t-lotes">
+      <div class="box">
+        <div class="tw"><table>
+          <thead><tr><th>Lote</th><th>Gerado em</th><th class="r">Linhas</th><th>Situação</th><th>Arquivo</th><th class="r">Ações</th></tr></thead>
+          <tbody id="lRows"></tbody>
+        </table></div>
+        <div class="warnbox">Depois de importar o TXT no sistema da loja, clique em <b>Confirmar importação</b> no lote. Nunca importe o mesmo lote duas vezes: um lote "Importado" já deu baixa no estoque.</div>
+      </div>
+    </section>
+
+    <!-- APARELHOS -->
+    <section class="pane" id="t-apar">
+      <div class="grid2">
+        <div class="box">
+          <div class="tw"><table>
+            <thead><tr><th>Aparelho</th><th>Último contato</th><th class="r">Hoje</th><th class="r">Total</th><th>Situação</th><th class="r">Ações</th></tr></thead>
+            <tbody id="aRows"></tbody>
+          </table></div>
+        </div>
+        <div class="box">
+          <h2>Ativar aparelho</h2>
+          <form id="fCod">
+            <div class="fld"><label for="cNome">Nome do aparelho</label><input id="cNome" placeholder="iPhone Danielle" maxlength="40" autocomplete="off"></div>
+            <div id="codOut"></div>
+            <button class="btn" type="submit" id="bCod">Gerar código de ativação</button>
+          </form>
+          <p class="small" style="margin:10px 0 0">No celular, abra o app e digite o código na tela "Ativar este celular". Para reativar um celular, use o mesmo nome.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- BASE -->
+    <section class="pane" id="t-base">
+      <div class="grid2">
+        <div class="box">
+          <h2>Base de produtos</h2>
+          <dl class="kv" id="bInfo"></dl>
+        </div>
+        <div class="box">
+          <h2>Como atualizar</h2>
+          <p style="margin:0 0 8px">Cole os produtos na aba <b>Produtos</b> da planilha (colunas código, descrição e preço por kg dos itens de balança) e use o menu <b>Contagem → Atualizar versão da base de produtos</b>.</p>
+          <p class="small" style="margin:0">Os celulares baixam a lista nova ao abrir o app. Futuramente o PC ligado ao servidor fará isso sozinho.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const API = window.CONTAGEM_API || "";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const dh = iso => iso ? new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+const fmtQ = (q, un) => un === "kg" ? q.toLocaleString("pt-BR", { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + " kg" : q.toLocaleString("pt-BR", { maximumFractionDigits: 3 });
+// Padrão do sistema: vírgula decimal e sem zeros sobrando
+const numTxt = q => String(Math.round(Number(q) * 1000) / 1000).replace(".", ",");
+
+let PIN = ""; try { PIN = sessionStorage.getItem("contagem_pin") || ""; } catch {}
+let pend = [], proximo = 1, lotes = [], aps = [], fAp = "todos";
+let askLote = false, askDel = null, editNc = null, askImp = null, askAp = null, ocupado = false;
+
+function toast(t, erro) { const el = $("toast"); el.textContent = t; el.className = "toast on" + (erro ? " err" : ""); clearTimeout(toast._t); toast._t = setTimeout(() => el.className = "toast", 2200); }
+
+async function api(acao, dados = {}) {
+  if (!/^https:\/\//.test(API)) throw new Error("O endereço do servidor não foi configurado no config.js.");
+  let j;
+  try {
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ acao, pin: PIN, ...dados }), redirect: "follow" });
+    j = await r.json();
+  } catch { throw new Error("Sem conexão com o servidor."); }
+  if (!j.ok && j.codigoErro === "pin") { sair(j.erro); throw new Error(j.erro); }
+  return j;
+}
+
+function baixar(nome, txt) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([txt], { type: "text/plain;charset=utf-8" }));
+  a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+/* ---------- login ---------- */
+$("fLogin").addEventListener("submit", async e => {
+  e.preventDefault();
+  PIN = $("pin").value.trim(); $("lMsg").textContent = ""; $("lGo").disabled = true;
+  try {
+    const j = await api("login");
+    if (!j.ok) { $("lMsg").textContent = j.erro; return; }
+    try { sessionStorage.setItem("contagem_pin", PIN); } catch {}
+    abrirPainel();
+  } catch (err) { $("lMsg").textContent = err.message; }
+  finally { $("lGo").disabled = false; }
+});
+function sair(msg) {
+  PIN = ""; try { sessionStorage.removeItem("contagem_pin"); } catch {}
+  $("vApp").hidden = true; $("vLogin").hidden = false; $("pin").value = ""; $("lMsg").textContent = msg || ""; $("pin").focus();
+}
+$("bSair").onclick = () => sair();
+function abrirPainel() { $("vLogin").hidden = true; $("vApp").hidden = false; carregarTudo(); }
+
+/* ---------- abas ---------- */
+let aba = "pend";
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+  aba = b.dataset.t;
+  document.querySelectorAll(".tabs button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  ["pend", "lotes", "apar", "base"].forEach(t => $("t-" + t).classList.toggle("on", t === aba));
+  if (aba === "lotes") carregarLotes(); if (aba === "apar") carregarAps(); if (aba === "base") carregarBase(); if (aba === "pend") carregarPend();
+});
+$("bRefresh").onclick = () => carregarTudo();
+async function carregarTudo() { await carregarPend(); carregarLotes(); carregarAps(); }
+
+/* ---------- pendentes ---------- */
+async function carregarPend() {
+  try {
+    const j = await api("pendentes");
+    if (!j.ok) { toast(j.erro, true); return; }
+    pend = j.pendentes; proximo = j.proximoLote;
+    $("upd").textContent = "Atualizado às " + new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    renderPend();
+  } catch (e) { toast(e.message, true); }
+}
+function renderPend() {
+  const ok = pend.filter(p => !p.nc), nc = pend.filter(p => p.nc);
+  $("nPend").textContent = pend.length;
+  const nomes = [...new Set(pend.map(p => p.aparelho))];
+  if (fAp !== "todos" && !nomes.includes(fAp)) fAp = "todos";
+  $("pSum").innerHTML = `<span><b class="num">${pend.length}</b>leituras</span><span><b class="num">${nomes.length}</b>aparelhos</span><span class="${nc.length ? "w" : ""}"><b class="num">${nc.length}</b>não cadastradas</span>`;
+  $("pChips").innerHTML = ["todos", ...nomes].map(a => `<button data-ap="${esc(a)}" aria-pressed="${a === fAp}">${a === "todos" ? "Todos" : esc(a)}</button>`).join("");
+  const V = fAp === "todos" ? pend : pend.filter(p => p.aparelho === fAp);
+  $("pRows").innerHTML = V.length ? V.map(p => {
+    if (askDel === p.id) return `<tr class="ask"><td colspan="5"><b>Excluir</b> ${esc(p.desc)} · ${fmtQ(p.qtd, p.un)} (${esc(p.aparelho)})?</td><td class="r"><button class="lnk red" data-delok="${p.id}">Excluir</button><button class="lnk" data-cancel="1">Manter</button></td></tr>`;
+    if (editNc === p.id) return `<tr class="nc"><td class="num">${dh(p.data)}</td><td>${esc(p.aparelho)}</td><td colspan="3"><div class="inl"><span class="small">Código certo:</span><input id="ncCod" class="mono" inputmode="numeric" value="" placeholder="${esc(p.codigo)}"><button class="lnk" data-ncok="${p.id}">Salvar</button><button class="lnk" data-cancel="1">Cancelar</button></div></td><td></td></tr>`;
+    return `<tr class="${p.nc ? "nc" : ""}"><td class="num nw">${dh(p.data)}</td><td>${esc(p.aparelho)}</td><td class="mono">${esc(p.codigo)}${p.etiqueta ? `<div class="small">etiqueta ${esc(p.etiqueta)}</div>` : ""}</td>
+      <td>${esc(p.desc)}${p.obs ? `<div class="small">${esc(p.obs)}</div>` : ""}</td><td class="r num nw"><b>${fmtQ(p.qtd, p.un)}</b></td>
+      <td class="r">${p.nc ? `<button class="lnk" data-nc="${p.id}">Corrigir</button>` : ""}<button class="lnk red" data-del="${p.id}">Excluir</button></td></tr>`;
+  }).join("") : '<tr><td colspan="6" class="empty">Nenhuma leitura pendente.</td></tr>';
+  if (editNc) setTimeout(() => $("ncCod")?.focus(), 0);
+  $("ncWarn").innerHTML = nc.length ? `<div class="warnbox"><b>${nc.length} leitura${nc.length > 1 ? "s" : ""} não cadastrada${nc.length > 1 ? "s" : ""}</b> fica${nc.length > 1 ? "m" : ""} fora do lote até você corrigir o código ou excluir.</div>` : "";
+  const linhas = ok.map(p => p.codigo + ";" + numTxt(p.qtd));
+  $("txt").textContent = linhas.length ? linhas.join("\n") : "(nenhuma linha)";
+  const nome = "baixa_lote_" + String(proximo).padStart(4, "0") + "_" + new Date().toLocaleDateString("sv-SE") + ".txt";
+  $("fname").textContent = nome + " · " + linhas.length + " linhas, uma por leitura";
+  $("bLote").disabled = !linhas.length || ocupado;
+  $("bLote").textContent = "Gerar lote " + proximo;
+  $("loteAsk").innerHTML = askLote ? `<div class="confirm">Gerar o lote ${proximo} com ${linhas.length} leituras? Elas ficam travadas e não entram em outro lote.<div class="row"><button class="btn" id="lYes">Gerar e baixar</button><button class="btn sec" id="lNo">Cancelar</button></div></div>` : "";
+  if (askLote) { $("lYes").onclick = gerarLote; $("lNo").onclick = () => { askLote = false; renderPend(); }; }
+}
+$("pChips").onclick = e => { const a = e.target.closest("button")?.dataset.ap; if (a) { fAp = a; renderPend(); } };
+$("pRows").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.del) { askDel = b.dataset.del; editNc = null; renderPend(); return; }
+  if (b.dataset.nc) { editNc = b.dataset.nc; askDel = null; renderPend(); return; }
+  if (b.dataset.cancel) { askDel = null; editNc = null; renderPend(); return; }
+  if (b.dataset.delok) {
+    b.disabled = true;
+    try { const j = await api("excluirLeitura", { id: b.dataset.delok }); toast(j.ok ? "Leitura excluída" : j.erro, !j.ok); } catch (err) { toast(err.message, true); }
+    askDel = null; carregarPend(); return;
+  }
+  if (b.dataset.ncok) {
+    const cod = ($("ncCod").value || "").replace(/\D/g, "");
+    if (!cod) { toast("Digite o código", true); return; }
+    b.disabled = true;
+    try { const j = await api("corrigirLeitura", { id: b.dataset.ncok, codigo: cod }); toast(j.ok ? "Corrigido: " + j.desc : j.erro, !j.ok); if (j.ok) editNc = null; } catch (err) { toast(err.message, true); }
+    carregarPend();
+  }
+});
+$("bLote").onclick = () => { askLote = true; renderPend(); };
+async function gerarLote() {
+  ocupado = true; askLote = false; renderPend();
+  const ids = pend.filter(p => !p.nc).map(p => p.id);
+  try {
+    const j = await api("gerarLote", { ids });
+    if (!j.ok) { toast(j.erro, true); return; }
+    baixar(j.arquivo, j.txt);
+    toast("Lote " + j.lote + " gerado · " + j.leituras + " linhas");
+    await carregarPend(); await carregarLotes();
+    document.querySelector('.tabs button[data-t="lotes"]').click();
+  } catch (e) { toast(e.message, true); }
+  finally { ocupado = false; renderPend(); }
+}
+
+/* ---------- lotes ---------- */
+async function carregarLotes() {
+  try { const j = await api("lotes"); if (j.ok) { lotes = j.lotes; renderLotes(); } } catch (e) { toast(e.message, true); }
+}
+function renderLotes() {
+  $("lRows").innerHTML = lotes.length ? lotes.map(l => {
+    const imp = l.status === "Importado";
+    const acoes = askImp === l.lote
+      ? `<span class="small">Já importou no sistema?</span> <button class="lnk" data-impok="${l.lote}">Sim, confirmar</button><button class="lnk red" data-cancel="1">Não</button>`
+      : `${imp ? "" : `<button class="lnk" data-imp="${l.lote}">Confirmar importação</button>`}<button class="lnk" data-txt="${l.lote}">${imp ? "Baixar TXT" : "Baixar de novo"}</button>`;
+    return `<tr><td class="mono"><b>${String(l.lote).padStart(4, "0")}</b></td><td class="num nw">${dh(l.gerado)}</td><td class="r num">${l.leituras}</td>
+      <td>${imp ? `<span class="pill imp">Importado ${dh(l.importado)}</span>` : '<span class="pill warn">Aguardando importação</span>'}</td>
+      <td class="small mono">${esc(l.arquivo)}</td><td class="r">${acoes}</td></tr>`;
+  }).join("") : '<tr><td colspan="6" class="empty">Nenhum lote gerado ainda.</td></tr>';
+}
+$("lRows").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.imp) { askImp = +b.dataset.imp; renderLotes(); return; }
+  if (b.dataset.cancel) { askImp = null; renderLotes(); return; }
+  if (b.dataset.impok) {
+    b.disabled = true;
+    try { const j = await api("confirmarImportacao", { lote: +b.dataset.impok }); toast(j.ok ? "Lote " + b.dataset.impok + " confirmado como importado" : j.erro, !j.ok); } catch (err) { toast(err.message, true); }
+    askImp = null; carregarLotes(); return;
+  }
+  if (b.dataset.txt) {
+    b.disabled = true;
+    try { const j = await api("txtLote", { lote: +b.dataset.txt }); if (j.ok) baixar(j.arquivo, j.txt); else toast(j.erro, true); } catch (err) { toast(err.message, true); }
+    b.disabled = false;
+  }
+});
+
+/* ---------- aparelhos ---------- */
+async function carregarAps() {
+  try { const j = await api("aparelhos"); if (j.ok) { aps = j.aparelhos; renderAps(); } } catch (e) { toast(e.message, true); }
+}
+function renderAps() {
+  $("aRows").innerHTML = aps.length ? aps.map((a, i) => `<tr><td><b>${esc(a.nome)}</b></td><td class="num">${dh(a.ultimo)}</td><td class="r num">${a.hoje}</td><td class="r num">${a.total}</td>
+    <td>${a.ativo ? '<span class="pill ok">Ativo</span>' : '<span class="pill off">Desativado</span>'}</td>
+    <td class="r">${askAp === i ? `<span class="small">Desativar?</span> <button class="lnk red" data-apok="${i}">Sim</button><button class="lnk" data-cancel="1">Não</button>`
+      : `<button class="lnk${a.ativo ? " red" : ""}" data-ap="${i}">${a.ativo ? "Desativar" : "Reativar"}</button>`}</td></tr>`).join("")
+    : '<tr><td colspan="6" class="empty">Nenhum aparelho ativado ainda. Gere um código ao lado.</td></tr>';
+}
+$("aRows").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.cancel) { askAp = null; renderAps(); return; }
+  const i = b.dataset.ap ?? b.dataset.apok; if (i === undefined) return;
+  const a = aps[+i];
+  if (b.dataset.ap !== undefined && a.ativo) { askAp = +i; renderAps(); return; }
+  b.disabled = true;
+  try { const j = await api("alternarAparelho", { nome: a.nome }); toast(j.ok ? (j.ativo ? a.nome + " reativado" : a.nome + " desativado") : j.erro, !j.ok); } catch (err) { toast(err.message, true); }
+  askAp = null; carregarAps();
+});
+let codTimer = null;
+$("fCod").addEventListener("submit", async e => {
+  e.preventDefault();
+  const nome = $("cNome").value.trim();
+  if (nome.length < 2) { toast("Digite o nome do aparelho", true); $("cNome").focus(); return; }
+  $("bCod").disabled = true;
+  try {
+    const j = await api("gerarCodigo", { nome });
+    if (!j.ok) { toast(j.erro, true); return; }
+    let fim = Date.now() + 600000;
+    const pintar = () => {
+      const s = Math.max(0, Math.round((fim - Date.now()) / 1000));
+      $("codOut").innerHTML = s ? `<div class="code">${j.codigo.slice(0, 3)} ${j.codigo.slice(3)}</div><p class="small" style="margin:0 0 12px;text-align:center">Para <b>${esc(j.nome)}</b> · vale por mais ${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}</p>`
+        : '<p class="small" style="margin:0 0 12px">O código venceu. Gere outro.</p>';
+      if (!s) clearInterval(codTimer);
+    };
+    clearInterval(codTimer); pintar(); codTimer = setInterval(pintar, 1000);
+  } catch (err) { toast(err.message, true); }
+  finally { $("bCod").disabled = false; }
+});
+
+/* ---------- base ---------- */
+async function carregarBase() {
+  $("bInfo").innerHTML = '<dt>Carregando…</dt><dd></dd>';
+  try {
+    const j = await api("infoBase");
+    if (!j.ok) { toast(j.erro, true); return; }
+    $("bInfo").innerHTML = `<dt>Produtos</dt><dd class="num">${j.total.toLocaleString("pt-BR")}</dd><dt>De balança</dt><dd class="num">${j.balanca.toLocaleString("pt-BR")}</dd>
+      <dt>Versão</dt><dd class="mono">${esc(j.versao)}</dd><dt>Última mudança</dt><dd>${dh(j.alteradaEm)}</dd>`;
+  } catch (e) { toast(e.message, true); }
+}
+
+/* ---------- atualização automática ---------- */
+setInterval(() => { if (!$("vApp").hidden && aba === "pend" && !askLote && !askDel && !editNc && !ocupado && document.visibilityState === "visible") carregarPend(); }, 30000);
+
+if (PIN) abrirPainel(); else $("pin").focus();
+</script>
+</body>
+</html>

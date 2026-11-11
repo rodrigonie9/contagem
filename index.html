@@ -14,7 +14,7 @@
 :root{
   --bg:#FFFFFF; --soft:#F3F9FD; --ink:#2B2F33; --muted:#6B7378; --line:#E3E8EC;
   --blue:#0A78D2; --blue-press:#0864B0; --sky:#41C1EE; --sky-soft:#E8F6FD;
-  --ok:#1E9E55; --warn:#D9822B; --warn-soft:#FDF1E4; --err:#D63B3B; --err-soft:#FCE6E6;
+  --ok:#1E9E55; --ok-soft:#E3F5EA; --warn:#D9822B; --warn-soft:#FDF1E4; --err:#D63B3B; --err-soft:#FCE6E6;
   --cam:#000;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -22,15 +22,22 @@
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
 body{display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top);user-select:none;-webkit-user-select:none;touch-action:manipulation}
 button{font:inherit;color:inherit;cursor:pointer}
+input{user-select:text;-webkit-user-select:text}
 .num{font-variant-numeric:tabular-nums}
 
 .scr{display:none;flex:1;flex-direction:column;min-height:0}
 .scr.on{display:flex}
 
 /* cabeçalho */
-.head{display:flex;align-items:center;gap:10px;padding:10px 16px}
-.head h1{margin:0;flex:1;font-size:20px;font-weight:700;color:#555}
-.chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--sky);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600;color:var(--blue);background:var(--bg)}
+.head{display:flex;align-items:center;gap:10px;padding:8px 16px}
+.head .t{flex:1;min-width:0}
+.head h1{margin:0;font-size:20px;font-weight:700;color:#555;line-height:1.1}
+.head small{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.chip i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.warn{background:var(--warn-soft);color:var(--warn)}
+.chip.err{background:var(--err-soft);color:var(--err)}
 
 /* câmera */
 .cam{position:relative;flex:0 0 38%;background:var(--cam);overflow:hidden;transition:flex-basis .2s ease}
@@ -39,7 +46,7 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 .guide{position:absolute;left:8%;right:8%;top:20%;bottom:20%;border:3px solid rgba(255,255,255,.9);border-radius:12px;box-shadow:0 0 0 999px rgba(0,0,0,.4);transition:border-color .12s,background .12s}
 .guide::after{content:"";position:absolute;left:6%;right:6%;top:50%;height:2px;background:#ff4b4b;box-shadow:0 0 8px #ff4b4b}
 .guide.hit{border-color:#3CC274;background:rgba(60,194,116,.25)}
-.cap{position:absolute;left:0;right:0;bottom:8px;text-align:center;color:#fff;font-size:14px;font-weight:600;text-shadow:0 1px 3px #000;pointer-events:none}
+.cap{position:absolute;left:0;right:0;bottom:8px;text-align:center;color:#fff;font-size:14px;font-weight:600;text-shadow:0 1px 3px #000;pointer-events:none;padding:0 50px}
 .cbtn{position:absolute;right:10px;display:none;width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:14px;font-weight:700;align-items:center;justify-content:center}
 #bTorch{top:10px} #bZoom{top:60px}
 .cbtn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2}
@@ -57,11 +64,16 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 .it .d{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .it .q{font-size:20px;font-weight:700;color:var(--blue);text-align:right;grid-row:span 2;align-self:center;white-space:nowrap}
 .it .q small{font-size:13px}
-.it .s{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;min-width:0}
+.it .s{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;min-width:0;flex-wrap:wrap}
 .it.nc .d{color:var(--warn)}
+.it.exc .d{text-decoration:line-through;color:var(--muted)}
 .pill{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.pill.fila{background:var(--warn-soft);color:var(--warn)}
+.pill.env{background:var(--ok-soft);color:var(--ok)}
+.pill.lote{background:var(--sky-soft);color:var(--blue)}
+.pill.imp{background:var(--blue);color:#fff}
+.pill.exc{background:var(--line);color:var(--muted)}
 .pill.nc{background:var(--warn-soft);color:var(--warn)}
-.pill.kg{background:var(--sky-soft);color:var(--blue)}
 .empty{color:var(--muted);text-align:center;padding:26px 10px;font-size:14px}
 
 .dock{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
@@ -93,6 +105,7 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 .no{border:1.5px solid var(--sky);background:var(--bg);color:var(--blue)}
 .yes{border:0;background:var(--blue);color:#fff}
 .yes:active{background:var(--blue-press)}
+.yes:disabled{opacity:.5}
 .shake{animation:sh .3s}
 @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
@@ -109,23 +122,53 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 .askrow button{border:0;border-radius:8px;padding:8px 12px;font-weight:700}
 .askrow .del{background:var(--err);color:#fff}
 .askrow .keep{background:var(--bg);border:1px solid var(--line)}
-.hfoot{display:grid;grid-template-columns:2fr 1fr;gap:10px;padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
-.hfoot .tile{height:60px;flex-direction:row;gap:8px;font-weight:600}
-.hfoot .tile.red{border-color:#F2B4B4;color:var(--err)}
-.clr{margin:0 16px 10px;background:var(--err-soft);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:600;display:flex;flex-direction:column;gap:8px}
-.clr div{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.clr button{border:0;border-radius:8px;padding:10px;font-weight:700}
+.hfoot{display:flex;flex-direction:column;gap:8px;padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.hinfo{font-size:13px;color:var(--muted)}
+.herr{font-size:13px;color:var(--err);font-weight:600}
+.hfoot .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hfoot .tile{height:54px;flex-direction:row;gap:8px;font-weight:600;font-size:14px}
+
+/* ativação */
+.atv{flex:1;display:flex;flex-direction:column;gap:14px;padding:28px 20px calc(20px + env(safe-area-inset-bottom));overflow:auto}
+.atv .logo{display:flex;align-items:center;gap:10px;color:var(--blue);font-weight:700;font-size:20px}
+.atv .logo svg{width:34px;height:34px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round}
+.atv h2{margin:6px 0 0;font-size:26px;color:#444}
+.atv p{margin:0;color:var(--muted);font-size:15px;line-height:1.45}
+.atv label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.atv input{height:60px;border-radius:12px;border:2px solid var(--sky);background:var(--soft);padding:0 14px;font-size:28px;font-weight:700;letter-spacing:.3em;text-align:center;color:var(--ink);width:100%;font-variant-numeric:tabular-nums}
+.atv input:focus{outline:none;border-color:var(--blue)}
+.amsg{font-size:14px;font-weight:600;min-height:20px}
+.amsg.err{color:var(--err)} .amsg.ok{color:var(--ok)}
+.atv .yes{height:58px;border-radius:14px;font-size:18px;font-weight:700}
 
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translate(-50%,-8px);opacity:0;background:var(--blue);color:#fff;font-weight:700;font-size:15px;padding:10px 18px;border-radius:999px;transition:.2s;pointer-events:none;z-index:9;white-space:nowrap}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
+<script src="config.js"></script>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 
+<!-- ============ ATIVAÇÃO ============ -->
+<section class="scr" id="s-atv">
+  <div class="atv">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M3 7V4h3M18 4h3v3M21 17v3h-3M6 20H3v-3M7 8v8M10 8v8M13 8v8M16 8v8"/></svg>Contagem</div>
+    <h2>Ativar este celular</h2>
+    <p>Peça o código de 6 números no Painel do PC, na aba <b>Aparelhos</b>. Ele vale por 10 minutos.</p>
+    <p id="aMotivo" hidden></p>
+    <label for="aCod">Código de ativação</label>
+    <input id="aCod" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code">
+    <div class="amsg" id="aMsg"></div>
+    <button class="yes" id="aGo">Ativar</button>
+  </div>
+</section>
+
 <!-- ============ LEITOR ============ -->
-<section class="scr on" id="s-scan">
-  <div class="head"><h1>Contagem</h1><span class="chip num" id="count">0 leituras</span></div>
+<section class="scr" id="s-scan">
+  <div class="head">
+    <div class="t"><h1>Contagem</h1><small id="apNome"></small></div>
+    <button class="chip ok" id="sync"><i></i><span>Tudo enviado</span></button>
+  </div>
   <div class="cam" id="cam">
     <video id="v" playsinline muted autoplay></video>
     <div class="guide" id="guide"></div>
@@ -164,24 +207,21 @@ video{width:100%;height:100%;object-fit:cover;display:block}
 <!-- ============ MINHAS LEITURAS ============ -->
 <section class="scr" id="s-hist">
   <div class="bar"><button class="back" id="hBack">‹ Leitor</button><h3>Minhas leituras</h3></div>
-  <div class="seg"><button id="fHoje" aria-pressed="true">Hoje</button><button id="fTudo" aria-pressed="false">Todas</button></div>
+  <div class="seg"><button id="fHoje" aria-pressed="true">Hoje</button><button id="fTudo" aria-pressed="false">Últimos 30 dias</button></div>
   <div class="list" id="histList"></div>
-  <div id="clrAsk"></div>
   <div class="hfoot">
-    <button class="tile" id="bExport"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Exportar TXT</button>
-    <button class="tile red" id="bClear">Zerar</button>
+    <div class="herr" id="hErr" hidden></div>
+    <div class="hinfo" id="hBase"></div>
+    <div class="row">
+      <button class="tile" id="bBase"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>Atualizar base</button>
+      <button class="tile" id="bSync"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>Enviar agora</button>
+    </div>
   </div>
 </section>
 
 <script type="module">
-// ================= BASE DE TESTE =================
-// Código sempre com 13 dígitos. Balança: "2" + PLU(5) completado com zeros, com preço por kg.
-const PRODUTOS = {
-  "7908580201349": { desc: "BATATA KLAIN" },
-  "7896436100628": { desc: "ÁGUA DA PEDRA" },
-  "0000000205280": { desc: "MORANGUINHO KG", precoKg: 34.98 },
-};
-// Etiqueta: 2 + PLU(5) + 0 + VALOR(5) + DV   ex.: 2 05280 0 01028 2
+// Etiqueta de balança: 2 + PLU(5) + 0 + VALOR(5) + DV   ex.: 2 05280 0 01028 2
+// chaveTam = quantos dígitos do início formam o código do sistema (205280 → 0000000205280)
 const CFG_BALANCA = { prefixo: "2", chaveTam: 6, valorInicio: 7, valorTam: 5, tipo: "preco" };
 
 // ==PURE==
@@ -213,32 +253,60 @@ function buscar(code, produtos, cfg) {
   if (b) return b;
   return { codigo: c13, desc: "PRODUTO NÃO CADASTRADO", qtd: 1, un: "un", erro: true };
 }
-// Padrão do sistema: codigo;quantidade, uma linha por leitura, sempre com vírgula e sem zeros sobrando (0,39 · 1,3 · 2)
-function numTxt(q) { return String(Math.round(Number(q) * 1000) / 1000).replace(".", ","); }
-function linhaTxt(r) { return r.codigo + ";" + numTxt(r.qtd); }
 // ==/PURE==
 
-// ================= APP =================
+// ================= ARMAZENAMENTO =================
 const $ = id => document.getElementById(id);
-const video = $("v"), guide = $("guide"), statusEl = $("status");
-const LS = "contagem_teste";
-let registros = [];
-try { registros = JSON.parse(localStorage.getItem(LS) || "[]"); } catch {}
-function salvar() { try { localStorage.setItem(LS, JSON.stringify(registros)); } catch {} }
-let sessao = [];
+const K_REG = "contagem_teste", K_AP = "contagem_aparelho", K_BASE = "contagem_base";
+const ler = (k, padrao) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : padrao; } catch { return padrao; } };
+const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
 
+let registros = ler(K_REG, []);
+// Leituras da fase de teste (sem status) não são enviadas
+registros.forEach(r => { if (!r.st) r.st = "teste"; if (!r.id) r.id = "t" + Math.random().toString(36).slice(2); });
+// Mantém só os últimos 30 dias de leituras já enviadas
+const LIMITE = Date.now() - 30 * 86400000;
+registros = registros.filter(r => r.st === "fila" || new Date(r.data).getTime() > LIMITE);
+function salvar() { gravar(K_REG, registros); }
+salvar();
+
+let aparelho = ler(K_AP, null);
+let base = ler(K_BASE, { versao: "", itens: [], em: "" });
+let PRODUTOS = {};
+function montarMapa() { PRODUTOS = {}; for (const [c, d, p] of base.itens) PRODUTOS[c] = { desc: d, precoKg: Number(p) || 0 }; }
+montarMapa();
+
+// ================= SERVIDOR =================
+const API = window.CONTAGEM_API || "";
+async function api(acao, dados = {}, ms = 25000) {
+  if (!/^https:\/\//.test(API)) throw new Error("O endereço do servidor não foi configurado (config.js).");
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms);
+  try {
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ acao, ...dados }), signal: ctl.signal, redirect: "follow" });
+    return await r.json();
+  } catch (e) {
+    throw new Error(e && e.name === "AbortError" ? "O servidor demorou para responder." : "Sem conexão com o servidor.");
+  } finally { clearTimeout(t); }
+}
+function erroAparelho(j) {
+  if (j && j.codigoErro === "aparelho") { pedirAtivacao(j.erro); return true; }
+  return false;
+}
+
+// ================= UTILIDADES =================
+let sessao = [];
 let detector = null, stream = null, track = null;
 let scanning = false, loopRunning = false, busy = false;
 let last = "", lastCount = 0, lastTime = 0, ignorar = { code: "", until: 0 };
-let atual = null, modo = "qtd", valor = "1", fresh = true;
+let atual = null, modo = "qtd", valor = "1", fresh = true, telaAtual = "";
 
 const hoje = d => new Date(d).toDateString() === new Date().toDateString();
 const hhmm = d => new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+const ddhh = d => new Date(d).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const qHtml = r => r.un === "kg" ? fmt(r.qtd, 3) + "<small> kg</small>" : fmt(r.qtd, Number.isInteger(r.qtd) ? 0 : 3);
 const qTxt = r => r.un === "kg" ? fmt(r.qtd, 3) + " kg" : fmt(r.qtd, Number.isInteger(r.qtd) ? 0 : 3) + " un";
 
-// ---- som ----
 let actx = null;
 function unlockAudio() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch {} }
 document.addEventListener("touchstart", unlockAudio, { passive: true });
@@ -248,9 +316,105 @@ function beep(freq = 1800, dur = 0.09) {
     o.type = "square"; o.frequency.value = freq; g.gain.value = 0.08; o.connect(g); g.connect(actx.destination);
     o.start(); o.stop(actx.currentTime + dur); } catch {}
 }
-function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("on"), 1200); }
+function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("on"), 1400); }
 
-// ---- leitor ----
+function tela(id) {
+  telaAtual = id;
+  ["s-atv", "s-scan", "s-hist"].forEach(s => $(s).classList.toggle("on", s === id));
+}
+
+// ================= ATIVAÇÃO =================
+function pedirAtivacao(motivo) {
+  scanning = false;
+  if (motivo) { $("aMotivo").hidden = false; $("aMotivo").textContent = motivo; $("aMotivo").style.color = "var(--err)"; }
+  $("aMsg").textContent = ""; $("aCod").value = "";
+  tela("s-atv");
+}
+$("aGo").onclick = async () => {
+  const cod = $("aCod").value.replace(/\D/g, "");
+  const msg = $("aMsg");
+  if (cod.length !== 6) { msg.className = "amsg err"; msg.textContent = "Digite os 6 números do código."; return; }
+  $("aGo").disabled = true; msg.className = "amsg"; msg.textContent = "Ativando…";
+  try {
+    const j = await api("ativar", { codigo: cod });
+    if (!j.ok) { msg.className = "amsg err"; msg.textContent = j.erro; return; }
+    aparelho = { token: j.token, nome: j.nome }; gravar(K_AP, aparelho);
+    msg.className = "amsg ok"; msg.textContent = "Ativado como " + j.nome + ". Baixando produtos…";
+    await atualizarBase(true);
+    $("aMotivo").hidden = true;
+    entrar();
+    toast("Celular ativado ✓");
+  } catch (e) { msg.className = "amsg err"; msg.textContent = e.message; }
+  finally { $("aGo").disabled = false; }
+};
+
+function entrar() {
+  $("apNome").textContent = aparelho.nome;
+  tela("s-scan");
+  renderSess(); renderSync();
+  if (!stream || !track || track.readyState === "ended") iniciarCamera(); else retomar();
+  sincronizar();
+}
+
+// ================= BASE DE PRODUTOS =================
+async function atualizarBase(forcar) {
+  if (!aparelho) return false;
+  try {
+    const j = await api("base", { token: aparelho.token, versao: forcar ? "" : base.versao }, 90000);
+    if (!j.ok) { erroAparelho(j); return false; }
+    if (!j.igual) { base = { versao: j.versao, itens: j.produtos, em: new Date().toISOString() }; montarMapa(); }
+    else base.em = new Date().toISOString();
+    if (!gravar(K_BASE, base)) toast("Sem espaço para guardar a base");
+    renderBase();
+    return true;
+  } catch { return false; }
+}
+function renderBase() {
+  $("hBase").textContent = base.itens.length
+    ? "Base: " + base.itens.length.toLocaleString("pt-BR") + " produtos · conferida em " + ddhh(base.em)
+    : "Base de produtos ainda não baixada.";
+}
+
+// ================= ENVIO (fila) =================
+let enviando = false, ultimoErro = "", falhas = 0, proxTentativa = 0;
+async function sincronizar(forcar) {
+  if (!aparelho || enviando) return;
+  if (forcar) proxTentativa = 0;
+  const fila = registros.filter(r => r.st === "fila");
+  if (!fila.length) { ultimoErro = ""; renderSync(); return; }
+  if (Date.now() < proxTentativa) return;
+  enviando = true; renderSync();
+  try {
+    const pacote = fila.slice(0, 200).map(r => ({ id: r.id, codigo: r.codigo, etiqueta: r.etiqueta || "", desc: r.desc, qtd: r.qtd, un: r.un, data: r.data, nc: !!r.naoCadastrado }));
+    const j = await api("enviar", { token: aparelho.token, leituras: pacote });
+    if (!j.ok) { if (erroAparelho(j)) throw new Error(j.erro); throw new Error(j.erro || "Erro no servidor"); }
+    const ok = new Set(j.recebidos);
+    registros.forEach(r => { if (ok.has(r.id)) { r.st = "enviado"; if (!r.srv) r.srv = "Pendente"; } });
+    salvar(); ultimoErro = ""; falhas = 0;
+  } catch (e) {
+    ultimoErro = e.message; falhas++;
+    proxTentativa = Date.now() + Math.min(60000, 3000 * 2 ** Math.min(falhas, 5));
+  }
+  enviando = false;
+  renderSync(); renderSess(); if (telaAtual === "s-hist") renderHist();
+  if (!ultimoErro && registros.some(r => r.st === "fila")) setTimeout(sincronizar, 400);
+}
+setInterval(sincronizar, 4000);
+window.addEventListener("online", () => sincronizar(true));
+
+function renderSync() {
+  const n = registros.filter(r => r.st === "fila").length, c = $("sync");
+  c.hidden = !aparelho;
+  const semRede = !navigator.onLine || !!ultimoErro;
+  c.className = "chip " + (!n ? "ok" : semRede ? "err" : "warn");
+  c.querySelector("span").textContent = !n ? "Tudo enviado" : semRede ? "Sem conexão · " + n + " na fila" : n + " enviando…";
+  const he = $("hErr");
+  he.hidden = !ultimoErro || !n; he.textContent = ultimoErro ? "Último envio falhou: " + ultimoErro + " As leituras continuam guardadas." : "";
+}
+$("sync").onclick = () => { sincronizar(true); toast(registros.some(r => r.st === "fila") ? "Tentando enviar…" : "Tudo enviado ✓"); };
+
+// ================= CÂMERA / LEITOR =================
+const video = $("v"), guide = $("guide"), statusEl = $("status");
 async function criarDetector() {
   const formats = ["ean_13", "ean_8", "upc_a"];
   if ("BarcodeDetector" in window) {
@@ -272,7 +436,7 @@ async function iniciarCamera() {
     video.srcObject = stream; await video.play();
     track = stream.getVideoTracks()[0];
     extrasCamera(); $("start").style.display = "none"; pedirWakeLock();
-    if (!$("qty").classList.contains("on")) retomar();
+    if (telaAtual === "s-scan" && !$("qty").classList.contains("on")) retomar();
   } catch (e) {
     mostrarStart(e && e.name === "NotAllowedError" ? "Permita o acesso à câmera para ler os códigos." : "Toque para ativar a câmera");
   }
@@ -294,15 +458,17 @@ $("bStart").onclick = () => { unlockAudio(); iniciarCamera(); };
 let wakeLock = null;
 async function pedirWakeLock() { try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {} }
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState !== "visible") return;
+  if (document.visibilityState !== "visible" || !aparelho) return;
   if (!track || track.readyState === "ended") iniciarCamera(); else { video.play().catch(() => {}); pedirWakeLock(); }
+  sincronizar(true);
+  if (!base.em || Date.now() - new Date(base.em).getTime() > 30 * 60000) atualizarBase(false);
 });
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
 function retomar() {
   scanning = true;
-  statusEl.textContent = detector ? "Aponte para o código de barras" : "Carregando leitor…";
+  statusEl.textContent = !detector ? "Carregando leitor…" : !base.itens.length ? "Base de produtos não baixada" : "Aponte para o código de barras";
   if (!loopRunning) { loopRunning = true; requestAnimationFrame(loop); }
 }
 async function loop() {
@@ -342,7 +508,7 @@ function tratar(raw) {
   return true;
 }
 
-// ---- tela de quantidade ----
+// ================= TELA DE QUANTIDADE =================
 function abrir(code) {
   atual = buscar(code, PRODUTOS, CFG_BALANCA);
   if (atual.erro) beep(300, 0.25); else beep();
@@ -360,8 +526,7 @@ function fechar() {
   atual = null; renderSess(); retomar();
 }
 function renderCard() {
-  const q = $("qty");
-  q.classList.toggle("nc", modo === "qtd" && !!atual?.erro);
+  $("qty").classList.toggle("nc", modo === "qtd" && !!atual?.erro);
   if (modo === "codigo") {
     $("pTags").innerHTML = ""; $("pDesc").textContent = "Digite o código de barras";
     $("pCode").textContent = "Para etiqueta danificada"; $("pNote").innerHTML = ""; $("qLbl").textContent = "Código";
@@ -369,8 +534,8 @@ function renderCard() {
     $("pTags").innerHTML = atual.un === "kg" && !atual.erro ? '<span class="etq">BALANÇA</span><span>' + esc(atual.info) + "</span>" : "";
     $("pDesc").textContent = atual.desc;
     $("pCode").textContent = atual.etiqueta ? "Cód. " + atual.codigo + " · etiqueta " + atual.etiqueta : "EAN " + atual.codigo;
-    const prev = registros.filter(r => r.codigo === atual.codigo && hoje(r.data));
-    $("pNote").innerHTML = atual.erro ? '<div class="ncmsg">Código fora da base. A leitura é guardada e marcada para conferência.</div>'
+    const prev = registros.filter(r => r.codigo === atual.codigo && hoje(r.data) && r.st !== "teste" && r.srv !== "Excluída");
+    $("pNote").innerHTML = atual.erro ? '<div class="ncmsg">Código fora da base. A leitura é guardada, mas só entra no TXT depois de corrigida no painel.</div>'
       : prev.length ? '<div class="prev">Já lançado hoje: <b>' + prev.slice(0, 3).map(r => qTxt(r) + " às " + hhmm(r.data)).join(", ") + (prev.length > 3 ? "…" : "") + "</b></div>" : "";
     $("qLbl").textContent = atual.un === "kg" ? "Peso (kg)" : "Quantidade";
   }
@@ -398,83 +563,101 @@ function tremer() { const q = $("qty"); q.classList.remove("shake"); void q.offs
 
 $("bOk").onclick = () => {
   if (modo === "codigo") {
-    if (!eanValido(valor) && !(valor.length >= 6 && valor.length <= 13)) { tremer(); beep(300, 0.25); toast("Código inválido"); return; }
+    if (valor.length < 4 || valor.length > 14) { tremer(); beep(300, 0.25); toast("Código inválido"); return; }
     abrir(valor); return;
   }
   const q = numVal();
   if (!(q > 0)) { tremer(); return; }
-  const r = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), codigo: atual.codigo, etiqueta: atual.etiqueta || "",
-    desc: atual.desc, qtd: q, un: atual.un, data: new Date().toISOString(), naoCadastrado: !!atual.erro };
-  registros.unshift(r); sessao.unshift(r.id); salvar();
+  const r = { id: Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8), codigo: atual.codigo, etiqueta: atual.etiqueta || "",
+    desc: atual.desc, qtd: Math.round(q * 1000) / 1000, un: atual.un, data: new Date().toISOString(), naoCadastrado: !!atual.erro, st: "fila" };
+  registros.unshift(r); sessao.unshift(r.id);
+  if (!gravar(K_REG, registros)) toast("Atenção: memória do celular cheia");
   ignorar = { code: atual.etiqueta || atual.codigo, until: performance.now() + 1500 };
-  toast("Salvo ✓"); fechar();
+  toast("Salvo ✓"); fechar(); renderSync();
+  sincronizar(true);
 };
 $("bCancel").onclick = () => fechar();
 $("bManual").onclick = () => { modo = "codigo"; valor = ""; fresh = false; atual = null; mostrarCard(); };
 
-// ---- sessão ----
+// ================= SESSÃO =================
+function pillHtml(r) {
+  if (r.st === "teste") return '<span class="pill exc">Teste · não enviado</span>';
+  if (r.st === "fila") return '<span class="pill fila">Na fila</span>';
+  if (r.srv === "Lote") return '<span class="pill lote">Lote ' + esc(r.lote) + "</span>";
+  if (r.srv === "Importado") return '<span class="pill imp">Importado</span>';
+  if (r.srv === "Excluída") return '<span class="pill exc">Excluída</span>';
+  return '<span class="pill env">Enviado</span>';
+}
 function itemHtml(r) {
-  return `<div class="it${r.naoCadastrado ? " nc" : ""}"><div class="d">${esc(r.desc)}</div><div class="q num">${qHtml(r)}</div>
-    <div class="s"><span class="num">${r.codigo}</span><span>${hhmm(r.data)}</span>${r.naoCadastrado ? '<span class="pill nc">Não cadastrado</span>' : ""}</div></div>`;
+  return `<div class="it${r.naoCadastrado ? " nc" : ""}${r.srv === "Excluída" ? " exc" : ""}"><div class="d">${esc(r.desc)}</div><div class="q num">${qHtml(r)}</div>
+    <div class="s"><span class="num">${r.codigo}</span><span>${hhmm(r.data)}</span>${pillHtml(r)}${r.naoCadastrado ? '<span class="pill nc">Não cadastrado</span>' : ""}</div></div>`;
 }
 function renderSess() {
   const L = sessao.map(id => registros.find(r => r.id === id)).filter(Boolean);
   $("sessN").textContent = L.length + (L.length === 1 ? " leitura" : " leituras");
-  $("count").textContent = registros.length + (registros.length === 1 ? " leitura" : " leituras");
   $("sessList").innerHTML = L.length ? L.map(itemHtml).join("") : '<div class="empty">Nenhuma leitura nesta sessão.<br>Aponte a câmera para um código de barras.</div>';
 }
 
-// ---- minhas leituras ----
-let filtro = "hoje", pergunta = null, zerando = false;
-function tela(id) { ["s-scan", "s-hist"].forEach(s => $(s).classList.toggle("on", s === id)); }
-$("bHist").onclick = () => { scanning = false; pergunta = null; zerando = false; tela("s-hist"); renderHist(); };
+// ================= MINHAS LEITURAS =================
+let filtro = "hoje", pergunta = null;
+$("bHist").onclick = () => { scanning = false; pergunta = null; tela("s-hist"); renderHist(); renderBase(); renderSync(); atualizarStatus(); };
 $("hBack").onclick = () => { tela("s-scan"); renderSess(); retomar(); };
 $("fHoje").onclick = () => { filtro = "hoje"; renderHist(); };
 $("fTudo").onclick = () => { filtro = "tudo"; renderHist(); };
+$("bBase").onclick = async () => { toast("Atualizando base…"); const ok = await atualizarBase(true); toast(ok ? "Base atualizada ✓" : "Não foi possível atualizar"); };
+$("bSync").onclick = () => { sincronizar(true); toast(registros.some(r => r.st === "fila") ? "Enviando…" : "Tudo enviado ✓"); };
+
+async function atualizarStatus() {
+  if (!aparelho) return;
+  const ids = registros.filter(r => r.st === "enviado" && r.srv !== "Importado" && r.srv !== "Excluída").map(r => r.id).slice(0, 800);
+  if (!ids.length) return;
+  try {
+    const j = await api("status", { token: aparelho.token, ids });
+    if (!j.ok) { erroAparelho(j); return; }
+    registros.forEach(r => { const s = j.status[r.id]; if (s) { r.srv = s.status; r.lote = s.lote; if (s.codigo) { r.codigo = s.codigo; r.desc = s.desc; r.naoCadastrado = s.nc; } } });
+    salvar(); if (telaAtual === "s-hist") renderHist();
+  } catch {}
+}
+function podeExcluir(r) { return r.st === "fila" || r.st === "teste" || (r.st === "enviado" && (!r.srv || r.srv === "Pendente")); }
 function renderHist() {
   $("fHoje").setAttribute("aria-pressed", filtro === "hoje"); $("fTudo").setAttribute("aria-pressed", filtro === "tudo");
   const L = filtro === "hoje" ? registros.filter(r => hoje(r.data)) : registros;
   $("histList").innerHTML = L.length ? L.map(r => {
-    const ask = pergunta === r.id;
-    const dt = hoje(r.data) ? hhmm(r.data) : new Date(r.data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-    return `<div class="it${r.naoCadastrado ? " nc" : ""}${ask ? " ask" : ""}"><div class="d">${esc(r.desc)}</div>
-      ${ask ? `<div class="q num">${qHtml(r)}</div>` : `<button class="x" data-del="${r.id}" aria-label="Excluir">×</button>`}
-      <div class="s"><span class="num">${r.codigo}</span><span>${dt}</span>${r.naoCadastrado ? '<span class="pill nc">Não cadastrado</span>' : ""}${ask ? "" : `<b class="num" style="margin-left:auto;color:var(--blue)">${qTxt(r)}</b>`}</div>
+    const ask = pergunta === r.id, pode = podeExcluir(r);
+    const dt = hoje(r.data) ? hhmm(r.data) : ddhh(r.data);
+    return `<div class="it${r.naoCadastrado ? " nc" : ""}${r.srv === "Excluída" ? " exc" : ""}${ask ? " ask" : ""}"><div class="d">${esc(r.desc)}</div>
+      ${pode && !ask ? `<button class="x" data-del="${r.id}" aria-label="Excluir">×</button>` : `<div class="q num">${qHtml(r)}</div>`}
+      <div class="s"><span class="num">${r.codigo}</span><span>${dt}</span>${pillHtml(r)}${pode && !ask ? `<b class="num" style="margin-left:auto;color:var(--blue)">${qTxt(r)}</b>` : ""}</div>
       ${ask ? `<div class="askrow">Excluir esta leitura? <button class="del" data-yes="${r.id}">Excluir</button><button class="keep" data-keep="1">Manter</button></div>` : ""}</div>`;
-  }).join("") : '<div class="empty">Nenhuma leitura ' + (filtro === "hoje" ? "hoje." : "salva.") + "</div>";
-  $("clrAsk").innerHTML = zerando ? `<div class="clr">Apagar todas as ${registros.length} leituras deste celular?<div><button id="cYes" style="background:var(--err);color:#fff">Apagar tudo</button><button id="cNo" style="background:#fff">Cancelar</button></div></div>` : "";
-  if (zerando) { $("cYes").onclick = () => { registros = []; sessao = []; salvar(); zerando = false; renderHist(); renderSess(); toast("Leituras apagadas"); }; $("cNo").onclick = () => { zerando = false; renderHist(); }; }
+  }).join("") : '<div class="empty">Nenhuma leitura ' + (filtro === "hoje" ? "hoje." : "nos últimos 30 dias.") + "</div>";
 }
-$("histList").addEventListener("click", e => {
+$("histList").addEventListener("click", async e => {
   const b = e.target.closest("button"); if (!b) return;
-  if (b.dataset.del) pergunta = b.dataset.del;
-  else if (b.dataset.yes) { registros = registros.filter(r => r.id !== b.dataset.yes); sessao = sessao.filter(x => x !== b.dataset.yes); salvar(); pergunta = null; toast("Leitura excluída"); }
-  else if (b.dataset.keep) pergunta = null;
-  renderHist(); renderSess();
+  if (b.dataset.del) { pergunta = b.dataset.del; renderHist(); return; }
+  if (b.dataset.keep) { pergunta = null; renderHist(); return; }
+  if (b.dataset.yes) {
+    const r = registros.find(x => x.id === b.dataset.yes); pergunta = null;
+    if (!r) { renderHist(); return; }
+    if (r.st === "enviado") {
+      b.disabled = true;
+      try {
+        const j = await api("excluir", { token: aparelho.token, id: r.id });
+        if (!j.ok) { erroAparelho(j); toast(j.erro || "Não foi possível excluir"); await atualizarStatus(); renderHist(); return; }
+      } catch (err) { toast("Sem conexão: tente de novo"); renderHist(); return; }
+    }
+    registros = registros.filter(x => x.id !== r.id); sessao = sessao.filter(x => x !== r.id);
+    salvar(); toast("Leitura excluída"); renderHist(); renderSess(); renderSync();
+  }
 });
-$("bClear").onclick = () => { if (registros.length) { zerando = true; renderHist(); } };
 
-// ---- exportar TXT: codigo;quantidade, uma linha por leitura ----
-$("bExport").onclick = async () => {
-  const L = (filtro === "hoje" ? registros.filter(r => hoje(r.data)) : registros).filter(r => !r.naoCadastrado).slice().reverse();
-  if (!L.length) { toast("Nada para exportar"); return; }
-  const txt = L.map(linhaTxt).join("\r\n") + "\r\n";
-  const d = new Date(), p = n => String(n).padStart(2, "0");
-  const nome = `baixa_${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.txt`;
-  const file = new File([txt], nome, { type: "text/plain" });
-  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: nome }); return; } }
-  catch (e) { if (e && e.name === "AbortError") return; }
-  const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = nome; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-};
-
-// ---- início ----
-renderSess();
+// ================= INÍCIO =================
 statusEl.textContent = "Carregando leitor…";
 criarDetector()
-  .then(d => { detector = d; if (scanning) statusEl.textContent = "Aponte para o código de barras"; })
+  .then(d => { detector = d; if (scanning) retomar(); })
   .catch(() => { statusEl.textContent = "Erro ao carregar o leitor. Verifique a internet e recarregue."; });
-iniciarCamera();
+
+if (!aparelho) pedirAtivacao();
+else { entrar(); atualizarBase(false); }
 </script>
 </body>
 </html>
