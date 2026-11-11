@@ -185,7 +185,9 @@ const PRODUTOS = {
 const CFG_BALANCA = { prefixo: "2", chaveTam: 6, valorInicio: 7, valorTam: 5, tipo: "preco" };
 
 // ==PURE==
-function fmt(n, d) { return Number(n).toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d }); }
+// Separador decimal do próprio iPhone ("," em português, "." em inglês)
+const DEC = (1.5).toLocaleString().replace(/[0-9]/g, "").charAt(0) || ",";
+function fmt(n, d) { return Number(n).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: false }); }
 function pad13(c) { return String(c).padStart(13, "0"); }
 function eanValido(c) {
   if (!/^(\d{8}|\d{12}|\d{13}|\d{14})$/.test(c)) return false;
@@ -211,8 +213,9 @@ function buscar(code, produtos, cfg) {
   if (b) return b;
   return { codigo: c13, desc: "PRODUTO NÃO CADASTRADO", qtd: 1, un: "un", erro: true };
 }
-// Uma linha por leitura, sem somar: codigo;quantidade
-function linhaTxt(r) { return r.codigo + ";" + (r.un === "kg" ? fmt(r.qtd, 3).replace(/\./g, "") : String(r.qtd).replace(".", ",")); }
+// Padrão do sistema: codigo;quantidade, uma linha por leitura, sempre com vírgula e sem zeros sobrando (0,39 · 1,3 · 2)
+function numTxt(q) { return String(Math.round(Number(q) * 1000) / 1000).replace(".", ","); }
+function linhaTxt(r) { return r.codigo + ";" + numTxt(r.qtd); }
 // ==/PURE==
 
 // ================= APP =================
@@ -375,16 +378,16 @@ function renderCard() {
   $("kComma").disabled = modo === "codigo";
   $("qMinus").hidden = $("qPlus").hidden = modo === "codigo";
 }
-const teclas = ["1","2","3","4","5","6","7","8","9",",","0","⌫"];
-$("keys").innerHTML = teclas.map(k => `<button data-k="${k}"${k === "," ? ' id="kComma"' : ""} aria-label="${k === "⌫" ? "Apagar" : k}">${k}</button>`).join("");
+const teclas = ["1","2","3","4","5","6","7","8","9",DEC,"0","⌫"];
+$("keys").innerHTML = teclas.map(k => `<button data-k="${k}"${k === DEC ? ' id="kComma"' : ""} aria-label="${k === "⌫" ? "Apagar" : k}">${k}</button>`).join("");
 $("keys").addEventListener("click", e => { const k = e.target.closest("button")?.dataset.k; if (k) tecla(k); });
 function tecla(k) {
   if (k === "⌫") { valor = fresh ? "" : valor.slice(0, -1); }
-  else if (k === ",") { if (modo === "codigo") return; if (fresh) valor = "0,"; else if (!valor.includes(",")) valor = (valor || "0") + ","; }
+  else if (k === DEC) { if (modo === "codigo") return; if (fresh) valor = "0" + DEC; else if (!valor.includes(DEC)) valor = (valor || "0") + DEC; }
   else { if (fresh) valor = ""; if (valor.length < 14) valor = (valor === "0" ? "" : valor) + k; }
   fresh = false; renderCard();
 }
-const numVal = () => parseFloat(String(valor).replace(",", ".")) || 0;
+const numVal = () => parseFloat(String(valor).replace(DEC, ".")) || 0;
 function passo(d) {
   const kg = atual.un === "kg"; let n = numVal() + d * (kg ? 0.1 : 1); if (n < 0) n = 0;
   valor = kg ? fmt(n, 3) : String(Math.round(n)); fresh = false; renderCard();
