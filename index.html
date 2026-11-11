@@ -5,134 +5,194 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Contagem">
-<meta name="theme-color" content="#0f1115">
-<title>Contagem MM</title>
+<meta name="theme-color" content="#ffffff">
+<title>Contagem</title>
 <style>
-:root{--bg:#0f1115;--panel:#181b22;--line:#2a2f3a;--txt:#f2f4f8;--mut:#9aa3b2;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444;--acc:#3b82f6}
+/* Padrão visual: fundo branco, azul do app da loja, cartões com borda azul-clara arredondada */
+:root{
+  --bg:#FFFFFF; --soft:#F3F9FD; --ink:#2B2F33; --muted:#6B7378; --line:#E3E8EC;
+  --blue:#0A78D2; --blue-press:#0864B0; --sky:#41C1EE; --sky-soft:#E8F6FD;
+  --ok:#1E9E55; --warn:#D9822B; --warn-soft:#FDF1E4; --err:#D63B3B; --err-soft:#FCE6E6;
+  --cam:#000;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none}
 body{display:flex;flex-direction:column;height:100dvh;padding-top:env(safe-area-inset-top);user-select:none;-webkit-user-select:none;touch-action:manipulation}
-header{display:flex;align-items:center;gap:8px;padding:8px 12px}
-header h1{font-size:17px;margin:0;flex:1}
-#count{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px}
-#cam{position:relative;flex:0 0 34dvh;background:#000;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+.num{font-variant-numeric:tabular-nums}
+
+.scr{display:none;flex:1;flex-direction:column;min-height:0}
+.scr.on{display:flex}
+
+/* cabeçalho */
+.head{display:flex;align-items:center;gap:10px;padding:10px 16px}
+.head h1{margin:0;flex:1;font-size:20px;font-weight:700;color:#555}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--sky);border-radius:999px;padding:5px 12px;font-size:14px;font-weight:600;color:var(--blue);background:var(--bg)}
+
+/* câmera */
+.cam{position:relative;flex:0 0 38%;background:var(--cam);overflow:hidden;transition:flex-basis .2s ease}
+.cam.small{flex-basis:20%}
 video{width:100%;height:100%;object-fit:cover;display:block}
-#guide{position:absolute;left:7%;right:7%;top:22%;height:56%;border:3px solid rgba(255,255,255,.85);border-radius:12px;box-shadow:0 0 0 999px rgba(0,0,0,.35);transition:border-color .12s,background .12s}
-#guide::after{content:"";position:absolute;left:5%;right:5%;top:50%;height:2px;background:var(--err);opacity:.8}
-#guide.hit{border-color:var(--ok);background:rgba(34,197,94,.25)}
-#status{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:14px;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
-#camBtns{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:8px}
-#camBtns button{width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:15px;font-weight:700;display:none}
-#start{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#000;padding:20px;text-align:center;font-size:15px}
-#start button{background:var(--acc);color:#fff;border:0;border-radius:12px;padding:14px 22px;font-size:17px;font-weight:700}
-main{flex:1;display:flex;flex-direction:column;min-height:0}
-#idle{flex:1;display:flex;flex-direction:column;min-height:0}
-#idle.hide{display:none}
-.tools{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;padding:10px 12px 4px}
-.tools button{height:46px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--txt);font-size:15px;font-weight:600}
-#lista{flex:1;overflow:auto;padding:0 12px calc(12px + env(safe-area-inset-bottom))}
-.row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
-.row .d{flex:1;min-width:0}
-.row .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .t.nc{color:var(--warn)}
-.row .s{font-size:12px;color:var(--mut);margin-top:2px}
-.row .n{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.row button{background:none;border:0;color:var(--mut);font-size:22px;padding:4px 6px}
-.vazio{color:var(--mut);text-align:center;padding:24px 8px;font-size:15px}
-#card{display:none;flex:1;flex-direction:column;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));min-height:0}
-#card.show{display:flex}
-#cDesc{font-size:20px;font-weight:700;line-height:1.2}
-#card.erro #cDesc{color:var(--warn)}
-#cInfo{font-size:13px;color:var(--mut);margin-top:-4px}
-.qbox{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border:2px solid var(--acc);border-radius:12px;padding:6px 14px}
-.qbox .lbl{color:var(--mut);font-size:13px}
-.qbox .q{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
-.keys{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:6px;flex:1;min-height:0}
-.keys button{font-size:24px;border:0;border-radius:10px;background:#252a35;color:var(--txt);min-height:40px}
-.keys button:active{background:#3a4152}
-.keys button:disabled{opacity:.3}
-.acts{display:grid;grid-template-columns:1fr 2fr;gap:8px}
-.acts button{height:56px;border:0;border-radius:12px;font-size:19px;font-weight:700}
-#bCancel{background:#2a2f3a;color:var(--txt)}
-#bOk{background:var(--ok);color:#06210f}
+.guide{position:absolute;left:8%;right:8%;top:20%;bottom:20%;border:3px solid rgba(255,255,255,.9);border-radius:12px;box-shadow:0 0 0 999px rgba(0,0,0,.4);transition:border-color .12s,background .12s}
+.guide::after{content:"";position:absolute;left:6%;right:6%;top:50%;height:2px;background:#ff4b4b;box-shadow:0 0 8px #ff4b4b}
+.guide.hit{border-color:#3CC274;background:rgba(60,194,116,.25)}
+.cap{position:absolute;left:0;right:0;bottom:8px;text-align:center;color:#fff;font-size:14px;font-weight:600;text-shadow:0 1px 3px #000;pointer-events:none}
+.cbtn{position:absolute;right:10px;display:none;width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:14px;font-weight:700;align-items:center;justify-content:center}
+#bTorch{top:10px} #bZoom{top:60px}
+.cbtn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2}
+.cam.small .cap,.cam.small .cbtn{visibility:hidden}
+.start{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center;background:#000;color:#fff;font-size:15px}
+.start button{background:var(--blue);color:#fff;border:0;border-radius:12px;padding:14px 22px;font-size:17px;font-weight:700}
+
+/* sessão */
+.sess{flex:1;min-height:0;display:flex;flex-direction:column}
+.sess-h{display:flex;align-items:baseline;justify-content:space-between;padding:12px 16px 4px}
+.sess-h b{font-size:16px;font-weight:700;color:#555}
+.sess-h span{font-size:13px;color:var(--muted)}
+.list{flex:1;overflow:auto;padding:0 16px}
+.it{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.it .d{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it .q{font-size:20px;font-weight:700;color:var(--blue);text-align:right;grid-row:span 2;align-self:center;white-space:nowrap}
+.it .q small{font-size:13px}
+.it .s{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center;min-width:0}
+.it.nc .d{color:var(--warn)}
+.pill{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.pill.nc{background:var(--warn-soft);color:var(--warn)}
+.pill.kg{background:var(--sky-soft);color:var(--blue)}
+.empty{color:var(--muted);text-align:center;padding:26px 10px;font-size:14px}
+
+.dock{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:72px;border:1.5px solid var(--sky);border-radius:14px;background:var(--bg);color:var(--blue);font-size:15px;font-weight:500}
+.tile svg{width:28px;height:28px;stroke:var(--blue);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tile:active{background:var(--sky-soft)}
+
+/* quantidade */
+.qty{display:none;flex:1;flex-direction:column;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));min-height:0}
+.qty.on{display:flex}
+.prod{display:flex;flex-direction:column;gap:3px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+.etq{background:var(--blue);color:#fff;font-weight:700;font-size:11px;padding:3px 8px;border-radius:4px;letter-spacing:.04em}
+.prod h2{margin:0;font-size:24px;line-height:1.1;font-weight:700}
+.qty.nc .prod h2{color:var(--warn)}
+.prod .code{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.prev{font-size:13px;color:var(--ink);background:var(--sky-soft);border-radius:8px;padding:6px 10px}
+.ncmsg{font-size:13px;background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:7px 10px;font-weight:600}
+.qline{display:grid;grid-template-columns:58px 1fr 58px;gap:8px}
+.qline button{border:1.5px solid var(--sky);border-radius:12px;background:var(--bg);color:var(--blue);font-size:30px;font-weight:600}
+.qbox{border:2px solid var(--blue);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px 8px;min-width:0}
+.qbox small{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.qbox output{font-size:38px;font-weight:700;line-height:1.05;color:var(--ink);font-variant-numeric:tabular-nums}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:6px;flex:1;min-height:140px}
+.keys button{border:1.5px solid var(--line);border-radius:12px;background:var(--soft);font-size:24px;font-weight:500;color:var(--ink)}
+.keys button:active,.qline button:active{background:var(--sky-soft)}
+.go{display:grid;grid-template-columns:1fr 2fr;gap:8px}
+.go button{height:56px;border-radius:14px;font-size:18px;font-weight:700}
+.no{border:1.5px solid var(--sky);background:var(--bg);color:var(--blue)}
+.yes{border:0;background:var(--blue);color:#fff}
+.yes:active{background:var(--blue-press)}
 .shake{animation:sh .3s}
 @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 10px);transform:translateX(-50%);background:var(--ok);color:#06210f;font-weight:700;padding:10px 18px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
-#toast.show{opacity:1}
+
+/* minhas leituras */
+.bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.back{border:0;background:none;font-size:17px;font-weight:600;color:var(--blue);padding:6px 4px}
+.bar h3{margin:0;flex:1;text-align:center;font-size:18px;color:#555;padding-right:56px}
+.seg{display:flex;gap:4px;padding:10px 16px 4px}
+.seg button{flex:1;border:1.5px solid var(--sky);background:var(--bg);color:var(--blue);border-radius:10px;padding:8px;font-weight:600;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.it .x{grid-column:2;grid-row:1/3;border:0;background:none;color:var(--muted);font-size:24px;padding:0 4px}
+.it.ask{background:var(--err-soft);margin:0 -16px;padding:10px 16px}
+.askrow{grid-column:1/-1;display:flex;gap:8px;align-items:center;margin-top:6px;font-size:13px;font-weight:600}
+.askrow button{border:0;border-radius:8px;padding:8px 12px;font-weight:700}
+.askrow .del{background:var(--err);color:#fff}
+.askrow .keep{background:var(--bg);border:1px solid var(--line)}
+.hfoot{display:grid;grid-template-columns:2fr 1fr;gap:10px;padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.hfoot .tile{height:60px;flex-direction:row;gap:8px;font-weight:600}
+.hfoot .tile.red{border-color:#F2B4B4;color:var(--err)}
+.clr{margin:0 16px 10px;background:var(--err-soft);border-radius:10px;padding:10px 12px;font-size:14px;font-weight:600;display:flex;flex-direction:column;gap:8px}
+.clr div{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.clr button{border:0;border-radius:8px;padding:10px;font-weight:700}
+
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translate(-50%,-8px);opacity:0;background:var(--blue);color:#fff;font-weight:700;font-size:15px;padding:10px 18px;border-radius:999px;transition:.2s;pointer-events:none;z-index:9;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
-<header>
-  <h1>Contagem · teste</h1>
-  <span id="count">0 itens</span>
-</header>
+<div class="toast" id="toast"></div>
 
-<div id="cam">
-  <video id="v" playsinline muted autoplay></video>
-  <div id="guide"></div>
-  <div id="status">Iniciando…</div>
-  <div id="camBtns">
-    <button id="bTorch" aria-label="Lanterna">🔦</button>
-    <button id="bZoom" aria-label="Zoom">1x</button>
+<!-- ============ LEITOR ============ -->
+<section class="scr on" id="s-scan">
+  <div class="head"><h1>Contagem</h1><span class="chip num" id="count">0 leituras</span></div>
+  <div class="cam" id="cam">
+    <video id="v" playsinline muted autoplay></video>
+    <div class="guide" id="guide"></div>
+    <div class="cap" id="status">Iniciando…</div>
+    <button class="cbtn" id="bTorch" aria-label="Lanterna"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6l-1 6h-4z"/><path d="M10 8h4v13h-4z"/></svg></button>
+    <button class="cbtn" id="bZoom" aria-label="Zoom">1x</button>
+    <div class="start" id="start"><div id="startMsg">Toque para ativar a câmera</div><button id="bStart">Ativar câmera</button></div>
   </div>
-  <div id="start">
-    <div id="startMsg">Toque para ativar a câmera</div>
-    <button id="bStart">Ativar câmera</button>
-  </div>
-</div>
 
-<main>
-  <section id="idle">
-    <div class="tools">
-      <button id="bManual">⌨ Digitar código</button>
-      <button id="bExport">Exportar</button>
-      <button id="bClear">Zerar</button>
+  <div class="sess" id="sess">
+    <div class="sess-h"><b>Nesta sessão</b><span id="sessN">0 leituras</span></div>
+    <div class="list" id="sessList"></div>
+    <div class="dock">
+      <button class="tile" id="bManual"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>Digitar código</button>
+      <button class="tile" id="bHist"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Minhas leituras</button>
     </div>
-    <div id="lista"></div>
-  </section>
+  </div>
 
-  <section id="card">
-    <div id="cDesc"></div>
-    <div id="cInfo"></div>
-    <div class="qbox"><span class="lbl" id="qLbl">Quantidade</span><span class="q" id="qVal">1</span></div>
+  <div class="qty" id="qty">
+    <div class="prod">
+      <div class="tags" id="pTags"></div>
+      <h2 id="pDesc">—</h2>
+      <div class="code" id="pCode"></div>
+    </div>
+    <div id="pNote"></div>
+    <div class="qline">
+      <button id="qMinus" aria-label="Diminuir">−</button>
+      <div class="qbox"><small id="qLbl">Quantidade</small><output id="qVal">1</output></div>
+      <button id="qPlus" aria-label="Aumentar">+</button>
+    </div>
     <div class="keys" id="keys"></div>
-    <div class="acts">
-      <button id="bCancel">Cancelar</button>
-      <button id="bOk">OK</button>
-    </div>
-  </section>
-</main>
-<div id="toast"></div>
+    <div class="go"><button class="no" id="bCancel">Cancelar</button><button class="yes" id="bOk">OK</button></div>
+  </div>
+</section>
+
+<!-- ============ MINHAS LEITURAS ============ -->
+<section class="scr" id="s-hist">
+  <div class="bar"><button class="back" id="hBack">‹ Leitor</button><h3>Minhas leituras</h3></div>
+  <div class="seg"><button id="fHoje" aria-pressed="true">Hoje</button><button id="fTudo" aria-pressed="false">Todas</button></div>
+  <div class="list" id="histList"></div>
+  <div id="clrAsk"></div>
+  <div class="hfoot">
+    <button class="tile" id="bExport"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Exportar TXT</button>
+    <button class="tile red" id="bClear">Zerar</button>
+  </div>
+</section>
 
 <script type="module">
 // ================= BASE DE TESTE =================
-// Base no formato do sistema: código sempre com 13 dígitos (zeros à esquerda).
-// Itens de balança: código "2" + PLU (5 dígitos), completado com zeros, e preço por kg.
+// Código sempre com 13 dígitos. Balança: "2" + PLU(5) completado com zeros, com preço por kg.
 const PRODUTOS = {
   "7908580201349": { desc: "BATATA KLAIN" },
   "7896436100628": { desc: "ÁGUA DA PEDRA" },
   "0000000205280": { desc: "MORANGUINHO KG", precoKg: 34.98 },
 };
 // Etiqueta: 2 + PLU(5) + 0 + VALOR(5) + DV   ex.: 2 05280 0 01028 2
-// chaveTam = quantos dígitos do início formam o código do sistema (205280)
 const CFG_BALANCA = { prefixo: "2", chaveTam: 6, valorInicio: 7, valorTam: 5, tipo: "preco" };
 
 // ==PURE==
 function fmt(n, d) { return Number(n).toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d }); }
-
+function pad13(c) { return String(c).padStart(13, "0"); }
 function eanValido(c) {
   if (!/^(\d{8}|\d{12}|\d{13}|\d{14})$/.test(c)) return false;
-  const d = c.split("").map(Number);
-  const chk = d.pop();
-  let s = 0;
+  const d = c.split("").map(Number); const chk = d.pop(); let s = 0;
   d.reverse().forEach((n, i) => { s += n * (i % 2 === 0 ? 3 : 1); });
   return (10 - (s % 10)) % 10 === chk;
 }
-
-function pad13(c) { return String(c).padStart(13, "0"); }
-
 function lerBalanca(code, cfg, itens) {
   if (code.length !== 13 || !code.startsWith(cfg.prefixo)) return null;
   const chave = pad13(code.substr(0, cfg.chaveTam));
@@ -140,25 +200,19 @@ function lerBalanca(code, cfg, itens) {
   if (!item || !item.precoKg) return { codigo: chave, etiqueta: code, desc: "BALANÇA: " + code.substr(0, cfg.chaveTam) + " NÃO CADASTRADO", qtd: 1, un: "kg", erro: true };
   const v = parseInt(code.substr(cfg.valorInicio, cfg.valorTam), 10);
   let peso, info;
-  if (cfg.tipo === "preco") {
-    const total = v / 100;
-    peso = Math.round((total / item.precoKg) * 1000) / 1000;
-    info = "Balança · R$ " + fmt(total, 2) + " ÷ R$ " + fmt(item.precoKg, 2) + "/kg";
-  } else {
-    peso = v / 1000;
-    info = "Balança · peso da etiqueta";
-  }
+  if (cfg.tipo === "preco") { const total = v / 100; peso = Math.round((total / item.precoKg) * 1000) / 1000; info = "R$ " + fmt(total, 2) + " ÷ R$ " + fmt(item.precoKg, 2) + "/kg"; }
+  else { peso = v / 1000; info = "peso da etiqueta"; }
   return { codigo: chave, etiqueta: code, desc: item.desc, qtd: peso, un: "kg", info };
 }
-
 function buscar(code, produtos, cfg) {
-  const c13 = pad13(code);
-  const p = produtos[c13];
+  const c13 = pad13(code); const p = produtos[c13];
   if (p && !p.precoKg) return { codigo: c13, desc: p.desc, qtd: 1, un: "un" };
   const b = lerBalanca(c13, cfg, produtos);
   if (b) return b;
   return { codigo: c13, desc: "PRODUTO NÃO CADASTRADO", qtd: 1, un: "un", erro: true };
 }
+// Uma linha por leitura, sem somar: codigo;quantidade
+function linhaTxt(r) { return r.codigo + ";" + (r.un === "kg" ? fmt(r.qtd, 3).replace(/\./g, "") : String(r.qtd).replace(".", ",")); }
 // ==/PURE==
 
 // ================= APP =================
@@ -168,125 +222,91 @@ const LS = "contagem_teste";
 let registros = [];
 try { registros = JSON.parse(localStorage.getItem(LS) || "[]"); } catch {}
 function salvar() { try { localStorage.setItem(LS, JSON.stringify(registros)); } catch {} }
+let sessao = [];
 
 let detector = null, stream = null, track = null;
 let scanning = false, loopRunning = false, busy = false;
 let last = "", lastCount = 0, lastTime = 0, ignorar = { code: "", until: 0 };
 let atual = null, modo = "qtd", valor = "1", fresh = true;
 
+const hoje = d => new Date(d).toDateString() === new Date().toDateString();
+const hhmm = d => new Date(d).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const qHtml = r => r.un === "kg" ? fmt(r.qtd, 3) + "<small> kg</small>" : fmt(r.qtd, Number.isInteger(r.qtd) ? 0 : 3);
+const qTxt = r => r.un === "kg" ? fmt(r.qtd, 3) + " kg" : fmt(r.qtd, Number.isInteger(r.qtd) ? 0 : 3) + " un";
+
 // ---- som ----
 let actx = null;
-function unlockAudio() {
-  try {
-    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === "suspended") actx.resume();
-  } catch {}
-}
+function unlockAudio() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === "suspended") actx.resume(); } catch {} }
 document.addEventListener("touchstart", unlockAudio, { passive: true });
 document.addEventListener("click", unlockAudio);
 function beep(freq = 1800, dur = 0.09) {
-  try {
-    if (!actx) return;
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = "square"; o.frequency.value = freq; g.gain.value = 0.08;
-    o.connect(g); g.connect(actx.destination);
-    o.start(); o.stop(actx.currentTime + dur);
-  } catch {}
+  try { if (!actx) return; const o = actx.createOscillator(), g = actx.createGain();
+    o.type = "square"; o.frequency.value = freq; g.gain.value = 0.08; o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur); } catch {}
 }
-
-function toast(t) {
-  const el = $("toast"); el.textContent = t; el.classList.add("show");
-  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("show"), 1100);
-}
+function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("on"), 1200); }
 
 // ---- leitor ----
 async function criarDetector() {
   const formats = ["ean_13", "ean_8", "upc_a"];
   if ("BarcodeDetector" in window) {
-    try {
-      const sup = await window.BarcodeDetector.getSupportedFormats();
-      if (sup.includes("ean_13")) return new window.BarcodeDetector({ formats });
-    } catch {}
+    try { const sup = await window.BarcodeDetector.getSupportedFormats(); if (sup.includes("ean_13")) return new window.BarcodeDetector({ formats }); } catch {}
   }
   const urls = [
     "https://cdn.jsdelivr.net/npm/barcode-detector@2/dist/es/pure.min.js",
     "https://fastly.jsdelivr.net/npm/barcode-detector@2/dist/es/pure.min.js",
     "https://unpkg.com/barcode-detector@2/dist/es/pure.min.js",
   ];
-  for (const u of urls) {
-    try { const m = await import(u); return new m.BarcodeDetector({ formats }); } catch {}
-  }
+  for (const u of urls) { try { const m = await import(u); return new m.BarcodeDetector({ formats }); } catch {} }
   throw new Error("leitor indisponível");
 }
-
 async function iniciarCamera() {
-  if (!navigator.mediaDevices?.getUserMedia) {
-    mostrarStart("Câmera indisponível. Abra este endereço (https) no Safari.");
-    return;
-  }
+  if (!navigator.mediaDevices?.getUserMedia) { mostrarStart("Câmera indisponível. Abra este endereço (https) no Safari."); return; }
   try {
     if (stream) stream.getTracks().forEach(t => t.stop());
-    stream = await navigator.mediaDevices.getUserMedia({
-      audio: false,
-      video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-    });
-    video.srcObject = stream;
-    await video.play();
+    stream = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1920 }, height: { ideal: 1080 } } });
+    video.srcObject = stream; await video.play();
     track = stream.getVideoTracks()[0];
-    extrasCamera();
-    $("start").style.display = "none";
-    pedirWakeLock();
-    retomar();
+    extrasCamera(); $("start").style.display = "none"; pedirWakeLock();
+    if (!$("qty").classList.contains("on")) retomar();
   } catch (e) {
-    mostrarStart(e && e.name === "NotAllowedError"
-      ? "Permita o acesso à câmera para ler os códigos."
-      : "Toque para ativar a câmera");
+    mostrarStart(e && e.name === "NotAllowedError" ? "Permita o acesso à câmera para ler os códigos." : "Toque para ativar a câmera");
   }
 }
 function mostrarStart(msg) { $("startMsg").textContent = msg; $("start").style.display = "flex"; }
-
 let zoomCaps = null, zoomAlto = false, torchOn = false;
 function extrasCamera() {
-  let caps = {};
-  try { caps = track.getCapabilities ? track.getCapabilities() : {}; } catch {}
+  let caps = {}; try { caps = track.getCapabilities ? track.getCapabilities() : {}; } catch {}
   try { if (caps.focusMode && caps.focusMode.includes("continuous")) track.applyConstraints({ advanced: [{ focusMode: "continuous" }] }); } catch {}
-  $("bTorch").style.display = caps.torch ? "block" : "none";
-  if (caps.zoom && caps.zoom.max >= 1.5) { zoomCaps = caps.zoom; $("bZoom").style.display = "block"; }
+  $("bTorch").style.display = caps.torch ? "flex" : "none";
+  if (caps.zoom && caps.zoom.max >= 1.5) { zoomCaps = caps.zoom; $("bZoom").style.display = "flex"; }
 }
-$("bTorch").onclick = async () => {
-  torchOn = !torchOn;
-  try { await track.applyConstraints({ advanced: [{ torch: torchOn }] }); } catch { torchOn = false; }
-};
+$("bTorch").onclick = async () => { torchOn = !torchOn; try { await track.applyConstraints({ advanced: [{ torch: torchOn }] }); } catch { torchOn = false; } };
 $("bZoom").onclick = async () => {
-  zoomAlto = !zoomAlto;
-  const z = zoomAlto ? Math.min(2, zoomCaps.max) : Math.max(1, zoomCaps.min);
+  zoomAlto = !zoomAlto; const z = zoomAlto ? Math.min(2, zoomCaps.max) : Math.max(1, zoomCaps.min);
   try { await track.applyConstraints({ advanced: [{ zoom: z }] }); $("bZoom").textContent = (zoomAlto ? 2 : 1) + "x"; } catch {}
 };
 $("bStart").onclick = () => { unlockAudio(); iniciarCamera(); };
-
 let wakeLock = null;
 async function pedirWakeLock() { try { wakeLock = await navigator.wakeLock?.request("screen"); } catch {} }
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") return;
-  if (!track || track.readyState === "ended") iniciarCamera();
-  else { video.play().catch(() => {}); pedirWakeLock(); }
+  if (!track || track.readyState === "ended") iniciarCamera(); else { video.play().catch(() => {}); pedirWakeLock(); }
 });
 
 const canvas = document.createElement("canvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
-
 function retomar() {
   scanning = true;
-  if (detector) statusEl.textContent = "Aponte para o código de barras";
+  statusEl.textContent = detector ? "Aponte para o código de barras" : "Carregando leitor…";
   if (!loopRunning) { loopRunning = true; requestAnimationFrame(loop); }
 }
-
 async function loop() {
   if (!scanning) { loopRunning = false; return; }
   if (detector && !busy && video.readyState >= 2 && video.videoWidth) {
     busy = true;
     try {
-      // recorta só a área do retângulo-guia (mais rápido e evita ler outro código)
       const vw = video.videoWidth, vh = video.videoHeight;
       const b = video.getBoundingClientRect(), g = guide.getBoundingClientRect();
       const scale = Math.max(b.width / vw, b.height / vh);
@@ -304,21 +324,17 @@ async function loop() {
   }
   requestAnimationFrame(loop);
 }
-
 function tratar(raw) {
   if (!scanning) return false;
   const code = String(raw || "").trim();
   if (!eanValido(code)) return false;
   const now = performance.now();
   if (code === ignorar.code && now < ignorar.until) return false;
-  // exige 2 leituras iguais seguidas: elimina leitura errada
   lastCount = (code === last && now - lastTime < 1500) ? lastCount + 1 : 1;
   last = code; lastTime = now;
   if (lastCount < 2) return false;
-  last = ""; lastCount = 0;
-  scanning = false;
-  guide.classList.add("hit");
-  setTimeout(() => guide.classList.remove("hit"), 350);
+  last = ""; lastCount = 0; scanning = false;
+  guide.classList.add("hit"); setTimeout(() => guide.classList.remove("hit"), 350);
   abrir(code);
   return true;
 }
@@ -326,122 +342,131 @@ function tratar(raw) {
 // ---- tela de quantidade ----
 function abrir(code) {
   atual = buscar(code, PRODUTOS, CFG_BALANCA);
-  if (atual.erro) { beep(300, 0.25); } else { beep(); }
-  modo = "qtd";
-  valor = atual.un === "kg" ? fmt(atual.qtd, 3) : String(atual.qtd);
-  fresh = true;
+  if (atual.erro) beep(300, 0.25); else beep();
+  modo = "qtd"; valor = atual.un === "kg" ? fmt(atual.qtd, 3) : String(atual.qtd); fresh = true;
   mostrarCard();
 }
 function mostrarCard() {
-  $("idle").classList.add("hide");
-  $("card").classList.add("show");
+  scanning = false;
+  $("sess").hidden = true; $("qty").classList.add("on"); $("cam").classList.add("small");
   statusEl.textContent = "Leitura pausada";
   renderCard();
 }
 function fechar() {
-  $("card").classList.remove("show");
-  $("idle").classList.remove("hide");
-  atual = null;
-  renderLista();
-  retomar();
+  $("qty").classList.remove("on"); $("sess").hidden = false; $("cam").classList.remove("small");
+  atual = null; renderSess(); retomar();
 }
 function renderCard() {
-  const card = $("card");
-  card.classList.toggle("erro", modo === "qtd" && !!atual?.erro);
+  const q = $("qty");
+  q.classList.toggle("nc", modo === "qtd" && !!atual?.erro);
   if (modo === "codigo") {
-    $("cDesc").textContent = "Digite o código de barras";
-    $("cInfo").textContent = "Para etiqueta danificada";
-    $("qLbl").textContent = "Código";
+    $("pTags").innerHTML = ""; $("pDesc").textContent = "Digite o código de barras";
+    $("pCode").textContent = "Para etiqueta danificada"; $("pNote").innerHTML = ""; $("qLbl").textContent = "Código";
   } else {
-    $("cDesc").textContent = atual.desc;
-    $("cInfo").textContent = (atual.info ? atual.info + " · " : "") + "Cód. " + atual.codigo;
+    $("pTags").innerHTML = atual.un === "kg" && !atual.erro ? '<span class="etq">BALANÇA</span><span>' + esc(atual.info) + "</span>" : "";
+    $("pDesc").textContent = atual.desc;
+    $("pCode").textContent = atual.etiqueta ? "Cód. " + atual.codigo + " · etiqueta " + atual.etiqueta : "EAN " + atual.codigo;
+    const prev = registros.filter(r => r.codigo === atual.codigo && hoje(r.data));
+    $("pNote").innerHTML = atual.erro ? '<div class="ncmsg">Código fora da base. A leitura é guardada e marcada para conferência.</div>'
+      : prev.length ? '<div class="prev">Já lançado hoje: <b>' + prev.slice(0, 3).map(r => qTxt(r) + " às " + hhmm(r.data)).join(", ") + (prev.length > 3 ? "…" : "") + "</b></div>" : "";
     $("qLbl").textContent = atual.un === "kg" ? "Peso (kg)" : "Quantidade";
   }
   $("qVal").textContent = valor || "0";
   $("kComma").disabled = modo === "codigo";
+  $("qMinus").hidden = $("qPlus").hidden = modo === "codigo";
 }
-
 const teclas = ["1","2","3","4","5","6","7","8","9",",","0","⌫"];
-$("keys").innerHTML = teclas.map(k => `<button data-k="${k}"${k === "," ? ' id="kComma"' : ""}>${k}</button>`).join("");
+$("keys").innerHTML = teclas.map(k => `<button data-k="${k}"${k === "," ? ' id="kComma"' : ""} aria-label="${k === "⌫" ? "Apagar" : k}">${k}</button>`).join("");
 $("keys").addEventListener("click", e => { const k = e.target.closest("button")?.dataset.k; if (k) tecla(k); });
-
 function tecla(k) {
-  if (k === "⌫") { valor = fresh ? "" : valor.slice(0, -1); fresh = false; }
-  else if (k === ",") {
-    if (modo === "codigo") return;
-    if (fresh) { valor = "0,"; fresh = false; }
-    else if (!valor.includes(",")) valor = (valor || "0") + ",";
-  } else {
-    if (fresh) { valor = ""; fresh = false; }
-    if (valor.length < 14) valor = (valor === "0" ? "" : valor) + k;
-  }
-  renderCard();
+  if (k === "⌫") { valor = fresh ? "" : valor.slice(0, -1); }
+  else if (k === ",") { if (modo === "codigo") return; if (fresh) valor = "0,"; else if (!valor.includes(",")) valor = (valor || "0") + ","; }
+  else { if (fresh) valor = ""; if (valor.length < 14) valor = (valor === "0" ? "" : valor) + k; }
+  fresh = false; renderCard();
 }
-
-function tremer() { const q = $("card"); q.classList.remove("shake"); void q.offsetWidth; q.classList.add("shake"); }
+const numVal = () => parseFloat(String(valor).replace(",", ".")) || 0;
+function passo(d) {
+  const kg = atual.un === "kg"; let n = numVal() + d * (kg ? 0.1 : 1); if (n < 0) n = 0;
+  valor = kg ? fmt(n, 3) : String(Math.round(n)); fresh = false; renderCard();
+}
+$("qMinus").onclick = () => passo(-1);
+$("qPlus").onclick = () => passo(1);
+function tremer() { const q = $("qty"); q.classList.remove("shake"); void q.offsetWidth; q.classList.add("shake"); }
 
 $("bOk").onclick = () => {
   if (modo === "codigo") {
-    if (!eanValido(valor)) { tremer(); beep(300, 0.25); toast("Código inválido"); return; }
-    abrir(valor);
-    return;
+    if (!eanValido(valor) && !(valor.length >= 6 && valor.length <= 13)) { tremer(); beep(300, 0.25); toast("Código inválido"); return; }
+    abrir(valor); return;
   }
-  const q = parseFloat(String(valor).replace(",", "."));
+  const q = numVal();
   if (!(q > 0)) { tremer(); return; }
-  registros.unshift({
-    codigo: atual.codigo, etiqueta: atual.etiqueta || "", desc: atual.desc,
-    qtd: q, un: atual.un, data: new Date().toISOString(), naoCadastrado: !!atual.erro,
-  });
-  salvar();
-  ignorar = { code: atual.codigo, until: performance.now() + 1500 };
-  toast("Salvo ✓");
-  fechar();
+  const r = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), codigo: atual.codigo, etiqueta: atual.etiqueta || "",
+    desc: atual.desc, qtd: q, un: atual.un, data: new Date().toISOString(), naoCadastrado: !!atual.erro };
+  registros.unshift(r); sessao.unshift(r.id); salvar();
+  ignorar = { code: atual.etiqueta || atual.codigo, until: performance.now() + 1500 };
+  toast("Salvo ✓"); fechar();
 };
 $("bCancel").onclick = () => fechar();
-$("bManual").onclick = () => { scanning = false; modo = "codigo"; valor = ""; fresh = false; atual = null; mostrarCard(); };
+$("bManual").onclick = () => { modo = "codigo"; valor = ""; fresh = false; atual = null; mostrarCard(); };
 
-// ---- lista / exportar ----
-function renderLista() {
-  $("count").textContent = registros.length + (registros.length === 1 ? " item" : " itens");
-  const el = $("lista");
-  if (!registros.length) { el.innerHTML = '<div class="vazio">Nenhuma leitura ainda.<br>Aponte a câmera para um código de barras.</div>'; return; }
-  el.innerHTML = registros.map((r, i) => {
-    const hora = new Date(r.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    const q = r.un === "kg" ? fmt(r.qtd, 3) + " kg" : fmt(r.qtd, Number.isInteger(r.qtd) ? 0 : 3);
-    return `<div class="row"><div class="d"><div class="t${r.naoCadastrado ? " nc" : ""}">${esc(r.desc)}</div>
-      <div class="s">${r.codigo}${r.etiqueta ? " · etiqueta " + r.etiqueta : ""} · ${hora}</div></div>
-      <div class="n">${q}</div><button data-i="${i}" aria-label="Apagar">×</button></div>`;
-  }).join("");
+// ---- sessão ----
+function itemHtml(r) {
+  return `<div class="it${r.naoCadastrado ? " nc" : ""}"><div class="d">${esc(r.desc)}</div><div class="q num">${qHtml(r)}</div>
+    <div class="s"><span class="num">${r.codigo}</span><span>${hhmm(r.data)}</span>${r.naoCadastrado ? '<span class="pill nc">Não cadastrado</span>' : ""}</div></div>`;
 }
-function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
-$("lista").addEventListener("click", e => {
-  const i = e.target.closest("button")?.dataset.i;
-  if (i === undefined) return;
-  if (confirm("Apagar " + registros[i].desc + "?")) { registros.splice(+i, 1); salvar(); renderLista(); }
+function renderSess() {
+  const L = sessao.map(id => registros.find(r => r.id === id)).filter(Boolean);
+  $("sessN").textContent = L.length + (L.length === 1 ? " leitura" : " leituras");
+  $("count").textContent = registros.length + (registros.length === 1 ? " leitura" : " leituras");
+  $("sessList").innerHTML = L.length ? L.map(itemHtml).join("") : '<div class="empty">Nenhuma leitura nesta sessão.<br>Aponte a câmera para um código de barras.</div>';
+}
+
+// ---- minhas leituras ----
+let filtro = "hoje", pergunta = null, zerando = false;
+function tela(id) { ["s-scan", "s-hist"].forEach(s => $(s).classList.toggle("on", s === id)); }
+$("bHist").onclick = () => { scanning = false; pergunta = null; zerando = false; tela("s-hist"); renderHist(); };
+$("hBack").onclick = () => { tela("s-scan"); renderSess(); retomar(); };
+$("fHoje").onclick = () => { filtro = "hoje"; renderHist(); };
+$("fTudo").onclick = () => { filtro = "tudo"; renderHist(); };
+function renderHist() {
+  $("fHoje").setAttribute("aria-pressed", filtro === "hoje"); $("fTudo").setAttribute("aria-pressed", filtro === "tudo");
+  const L = filtro === "hoje" ? registros.filter(r => hoje(r.data)) : registros;
+  $("histList").innerHTML = L.length ? L.map(r => {
+    const ask = pergunta === r.id;
+    const dt = hoje(r.data) ? hhmm(r.data) : new Date(r.data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+    return `<div class="it${r.naoCadastrado ? " nc" : ""}${ask ? " ask" : ""}"><div class="d">${esc(r.desc)}</div>
+      ${ask ? `<div class="q num">${qHtml(r)}</div>` : `<button class="x" data-del="${r.id}" aria-label="Excluir">×</button>`}
+      <div class="s"><span class="num">${r.codigo}</span><span>${dt}</span>${r.naoCadastrado ? '<span class="pill nc">Não cadastrado</span>' : ""}${ask ? "" : `<b class="num" style="margin-left:auto;color:var(--blue)">${qTxt(r)}</b>`}</div>
+      ${ask ? `<div class="askrow">Excluir esta leitura? <button class="del" data-yes="${r.id}">Excluir</button><button class="keep" data-keep="1">Manter</button></div>` : ""}</div>`;
+  }).join("") : '<div class="empty">Nenhuma leitura ' + (filtro === "hoje" ? "hoje." : "salva.") + "</div>";
+  $("clrAsk").innerHTML = zerando ? `<div class="clr">Apagar todas as ${registros.length} leituras deste celular?<div><button id="cYes" style="background:var(--err);color:#fff">Apagar tudo</button><button id="cNo" style="background:#fff">Cancelar</button></div></div>` : "";
+  if (zerando) { $("cYes").onclick = () => { registros = []; sessao = []; salvar(); zerando = false; renderHist(); renderSess(); toast("Leituras apagadas"); }; $("cNo").onclick = () => { zerando = false; renderHist(); }; }
+}
+$("histList").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.del) pergunta = b.dataset.del;
+  else if (b.dataset.yes) { registros = registros.filter(r => r.id !== b.dataset.yes); sessao = sessao.filter(x => x !== b.dataset.yes); salvar(); pergunta = null; toast("Leitura excluída"); }
+  else if (b.dataset.keep) pergunta = null;
+  renderHist(); renderSess();
 });
-$("bClear").onclick = () => {
-  if (registros.length && confirm("Apagar todas as " + registros.length + " leituras?")) { registros = []; salvar(); renderLista(); }
-};
+$("bClear").onclick = () => { if (registros.length) { zerando = true; renderHist(); } };
+
+// ---- exportar TXT: codigo;quantidade, uma linha por leitura ----
 $("bExport").onclick = async () => {
-  if (!registros.length) { toast("Nada para exportar"); return; }
-  const linhas = ["codigo;descricao;quantidade;unidade;etiqueta;data_hora"];
-  for (const r of [...registros].reverse()) {
-    linhas.push([r.codigo, r.desc.replace(/;/g, ","), String(r.qtd).replace(".", ","), r.un, r.etiqueta || "",
-      new Date(r.data).toLocaleString("pt-BR")].join(";"));
-  }
-  const csv = "\ufeff" + linhas.join("\r\n");
-  const nome = "contagem_" + new Date().toISOString().slice(0, 10) + ".csv";
-  const file = new File([csv], nome, { type: "text/csv" });
-  try {
-    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: nome }); return; }
-  } catch (e) { if (e && e.name === "AbortError") return; }
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(file); a.download = nome; a.click();
+  const L = (filtro === "hoje" ? registros.filter(r => hoje(r.data)) : registros).filter(r => !r.naoCadastrado).slice().reverse();
+  if (!L.length) { toast("Nada para exportar"); return; }
+  const txt = L.map(linhaTxt).join("\r\n") + "\r\n";
+  const d = new Date(), p = n => String(n).padStart(2, "0");
+  const nome = `baixa_${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.txt`;
+  const file = new File([txt], nome, { type: "text/plain" });
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: nome }); return; } }
+  catch (e) { if (e && e.name === "AbortError") return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = nome; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 };
 
 // ---- início ----
-renderLista();
+renderSess();
 statusEl.textContent = "Carregando leitor…";
 criarDetector()
   .then(d => { detector = d; if (scanning) statusEl.textContent = "Aponte para o código de barras"; })
