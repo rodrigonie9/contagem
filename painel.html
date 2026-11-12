@@ -185,8 +185,9 @@ tr.ask td{background:var(--err-soft)}
         </div>
         <div class="box">
           <h2>Como atualizar</h2>
-          <p style="margin:0 0 8px">Cole os produtos na aba <b>Produtos</b> da planilha (colunas código, descrição e preço por kg dos itens de balança) e use o menu <b>Contagem → Atualizar versão da base de produtos</b>.</p>
-          <p class="small" style="margin:0">Os celulares baixam a lista nova ao abrir o app. Futuramente o PC ligado ao servidor fará isso sozinho.</p>
+          <p style="margin:0 0 8px">Com a sincronização instalada, o servidor da loja envia os produtos ativos a cada hora, sozinho. Os celulares baixam a lista nova ao abrir o app.</p>
+          <p style="margin:0 0 8px">Para atualizar na hora: no servidor, Agendador de Tarefas → <b>Contagem - Sincronizar produtos</b> → botão direito → <b>Executar</b>.</p>
+          <p class="small" style="margin:0">Se aparecer "Atrasada", veja o arquivo C:\Contagem\sincronizacao.log no servidor. Sem a sincronização, cole os produtos na aba Produtos e use o menu Contagem → Atualizar versão da base.</p>
         </div>
       </div>
     </section>
@@ -405,8 +406,15 @@ async function carregarBase() {
   try {
     const j = await api("infoBase");
     if (!j.ok) { toast(j.erro, true); return; }
+    const sy = j.sync || {};
+    const ult = sy.conferido || sy.em;
+    const horas = ult ? (Date.now() - new Date(ult).getTime()) / 3600000 : null;
+    const selo = !ult ? '<span class="pill off">Não instalada</span>' : horas > 3 ? '<span class="pill warn" style="background:var(--err-soft);color:var(--err)">Atrasada · confira o servidor</span>' : '<span class="pill ok">Em dia</span>';
     $("bInfo").innerHTML = `<dt>Produtos</dt><dd class="num">${j.total.toLocaleString("pt-BR")}</dd><dt>De balança</dt><dd class="num">${j.balanca.toLocaleString("pt-BR")}</dd>
-      <dt>Versão</dt><dd class="mono">${esc(j.versao)}</dd><dt>Última mudança</dt><dd>${dh(j.alteradaEm)}</dd>`;
+      <dt>Versão</dt><dd class="mono">${esc(j.versao)}</dd><dt>Última mudança</dt><dd>${dh(j.alteradaEm)}</dd>
+      <dt>Sincronização</dt><dd>${selo}</dd>
+      <dt>Último envio do servidor</dt><dd>${sy.em ? dh(sy.em) + " · " + (sy.total || 0).toLocaleString("pt-BR") + " produtos" : "—"}</dd>
+      <dt>Última conferência</dt><dd>${ult ? dh(ult) + (sy.origem ? " · " + esc(sy.origem) : "") : "—"}</dd>`;
   } catch (e) { toast(e.message, true); }
 }
 
