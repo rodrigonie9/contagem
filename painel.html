@@ -70,6 +70,12 @@ tr.ask td{background:var(--err-soft)}
 .pill.imp{background:var(--blue);color:#fff}
 .txt{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;line-height:1.6;white-space:pre;overflow:auto;max-height:320px}
 .fn{font-size:12px;color:var(--muted);margin:8px 0 12px;word-break:break-all}
+.origem{border-radius:12px;padding:10px 12px;margin-bottom:12px;display:flex;flex-direction:column;gap:2px}
+.origem small{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.origem b{font-size:18px;line-height:1.2}
+.origem span{font-size:13px}
+.origem.todos{background:var(--blue);color:#fff}
+.origem.um{background:var(--warn-soft);color:#7a4100;border:2px solid var(--warn)}
 .btn{border:0;border-radius:12px;padding:12px 16px;font-weight:700;font-size:15px;background:var(--blue);color:#fff;width:100%}
 .btn:hover{background:var(--blue-press)}
 .btn.sec{background:var(--card);color:var(--blue);border:1.5px solid var(--sky)}
@@ -135,11 +141,12 @@ tr.ask td{background:var(--err-soft)}
         </div>
         <div class="box">
           <h2>Prévia do TXT</h2>
+          <div class="origem todos" id="origem"></div>
           <div class="txt" id="txt"></div>
           <div class="fn" id="fname"></div>
           <button class="btn" id="bLote">Gerar lote</button>
           <div id="loteAsk"></div>
-          <div class="infobox">O lote inclui as leituras pendentes de <b>todos os aparelhos</b>, menos as não cadastradas. O filtro por aparelho serve só para conferir.</div>
+          <div class="infobox">O lote segue o filtro de aparelho escolhido à esquerda. Leituras de outros aparelhos e leituras não cadastradas continuam pendentes.</div>
         </div>
       </div>
     </section>
@@ -148,7 +155,7 @@ tr.ask td{background:var(--err-soft)}
     <section class="pane" id="t-lotes">
       <div class="box">
         <div class="tw"><table>
-          <thead><tr><th>Lote</th><th>Gerado em</th><th class="r">Linhas</th><th>Situação</th><th>Arquivo</th><th class="r">Ações</th></tr></thead>
+          <thead><tr><th>Lote</th><th>Gerado em</th><th>Aparelhos</th><th class="r">Linhas</th><th>Situação</th><th>Arquivo</th><th class="r">Ações</th></tr></thead>
           <tbody id="lRows"></tbody>
         </table></div>
         <div class="warnbox">Depois de importar o TXT no sistema da loja, clique em <b>Confirmar importação</b> no lote. Nunca importe o mesmo lote duas vezes: um lote "Importado" já deu baixa no estoque.</div>
@@ -187,7 +194,7 @@ tr.ask td{background:var(--err-soft)}
           <h2>Como atualizar</h2>
           <p style="margin:0 0 8px">Com a sincronização instalada, o servidor da loja envia os produtos ativos a cada hora, sozinho. Os celulares baixam a lista nova ao abrir o app.</p>
           <p style="margin:0 0 8px">Para atualizar na hora: no servidor, Agendador de Tarefas → <b>Contagem - Sincronizar produtos</b> → botão direito → <b>Executar</b>.</p>
-          <p class="small" style="margin:0">Se aparecer "Atrasada", veja o arquivo C:\Contagem\sincronizacao.log no servidor. Sem a sincronização, cole os produtos na aba Produtos e use o menu Contagem → Atualizar versão da base.</p>
+          <p class="small" style="margin:0">Se aparecer "Atrasada", veja o arquivo C:\RodrigoAppColeta\sincronizacao.log no servidor. Sem a sincronização, cole os produtos na aba Produtos e use o menu Contagem → Atualizar versão da base.</p>
         </div>
       </div>
     </section>
@@ -267,6 +274,7 @@ async function carregarPend() {
     renderPend();
   } catch (e) { toast(e.message, true); }
 }
+function loteSel() { return pend.filter(p => !p.nc && (fAp === "todos" || p.aparelho === fAp)); }
 function renderPend() {
   const ok = pend.filter(p => !p.nc), nc = pend.filter(p => p.nc);
   $("nPend").textContent = pend.length;
@@ -284,16 +292,25 @@ function renderPend() {
   }).join("") : '<tr><td colspan="6" class="empty">Nenhuma leitura pendente.</td></tr>';
   if (editNc) setTimeout(() => $("ncCod")?.focus(), 0);
   $("ncWarn").innerHTML = nc.length ? `<div class="warnbox"><b>${nc.length} leitura${nc.length > 1 ? "s" : ""} não cadastrada${nc.length > 1 ? "s" : ""}</b> fica${nc.length > 1 ? "m" : ""} fora do lote até você corrigir o código ou excluir.</div>` : "";
-  const linhas = ok.map(p => p.codigo + ";" + numTxt(p.qtd));
+  // O lote segue o filtro de aparelho
+  const sel = loteSel();
+  const todos = fAp === "todos";
+  const fora = ok.length - sel.length;
+  const linhas = sel.map(p => p.codigo + ";" + numTxt(p.qtd));
+  const origem = $("origem");
+  origem.className = "origem " + (todos ? "todos" : "um");
+  origem.innerHTML = todos
+    ? `<small>Origem do lote</small><b>Todos os aparelhos${nomes.length ? " (" + nomes.length + ")" : ""}</b><span>${esc(nomes.join(", ")) || "—"}</span>`
+    : `<small>Origem do lote</small><b>Só ${esc(fAp)}</b><span>${fora} leitura${fora === 1 ? "" : "s"} de outros aparelhos ${fora === 1 ? "continua pendente" : "continuam pendentes"}</span>`;
   $("txt").textContent = linhas.length ? linhas.join("\n") : "(nenhuma linha)";
   const nome = "baixa_lote_" + String(proximo).padStart(4, "0") + "_" + new Date().toLocaleDateString("sv-SE") + ".txt";
-  $("fname").textContent = nome + " · " + linhas.length + " linhas, uma por leitura";
+  $("fname").innerHTML = esc(nome) + " · <b>" + linhas.length + " linhas</b>, uma por leitura · <b>" + (todos ? "todos os aparelhos" : "só " + esc(fAp)) + "</b>";
   $("bLote").disabled = !linhas.length || ocupado;
-  $("bLote").textContent = "Gerar lote " + proximo;
-  $("loteAsk").innerHTML = askLote ? `<div class="confirm">Gerar o lote ${proximo} com ${linhas.length} leituras? Elas ficam travadas e não entram em outro lote.<div class="row"><button class="btn" id="lYes">Gerar e baixar</button><button class="btn sec" id="lNo">Cancelar</button></div></div>` : "";
+  $("bLote").textContent = "Gerar lote " + proximo + (todos ? " · todos os aparelhos" : " · só " + fAp);
+  $("loteAsk").innerHTML = askLote ? `<div class="confirm"><div>Gerar o lote ${proximo} com <b>${linhas.length} leituras ${todos ? "de todos os aparelhos" : "do " + esc(fAp)}</b>?${!todos && fora ? (fora === 1 ? " A leitura do outro aparelho continua pendente." : ` As ${fora} leituras dos outros aparelhos continuam pendentes.`) : ""} As leituras do lote ficam travadas e não entram em outro lote.</div><div class="row"><button class="btn" id="lYes">Gerar e baixar</button><button class="btn sec" id="lNo">Cancelar</button></div></div>` : "";
   if (askLote) { $("lYes").onclick = gerarLote; $("lNo").onclick = () => { askLote = false; renderPend(); }; }
 }
-$("pChips").onclick = e => { const a = e.target.closest("button")?.dataset.ap; if (a) { fAp = a; renderPend(); } };
+$("pChips").onclick = e => { const a = e.target.closest("button")?.dataset.ap; if (a) { fAp = a; askLote = false; renderPend(); } };
 $("pRows").addEventListener("click", async e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.dataset.del) { askDel = b.dataset.del; editNc = null; renderPend(); return; }
@@ -315,7 +332,7 @@ $("pRows").addEventListener("click", async e => {
 $("bLote").onclick = () => { askLote = true; renderPend(); };
 async function gerarLote() {
   ocupado = true; askLote = false; renderPend();
-  const ids = pend.filter(p => !p.nc).map(p => p.id);
+  const ids = loteSel().map(p => p.id);
   try {
     const j = await api("gerarLote", { ids });
     if (!j.ok) { toast(j.erro, true); return; }
@@ -337,10 +354,10 @@ function renderLotes() {
     const acoes = askImp === l.lote
       ? `<span class="small">Já importou no sistema?</span> <button class="lnk" data-impok="${l.lote}">Sim, confirmar</button><button class="lnk red" data-cancel="1">Não</button>`
       : `${imp ? "" : `<button class="lnk" data-imp="${l.lote}">Confirmar importação</button>`}<button class="lnk" data-txt="${l.lote}">${imp ? "Baixar TXT" : "Baixar de novo"}</button>`;
-    return `<tr><td class="mono"><b>${String(l.lote).padStart(4, "0")}</b></td><td class="num nw">${dh(l.gerado)}</td><td class="r num">${l.leituras}</td>
+    return `<tr><td class="mono"><b>${String(l.lote).padStart(4, "0")}</b></td><td class="num nw">${dh(l.gerado)}</td><td>${esc(l.aparelhos || "—")}</td><td class="r num">${l.leituras}</td>
       <td>${imp ? `<span class="pill imp">Importado ${dh(l.importado)}</span>` : '<span class="pill warn">Aguardando importação</span>'}</td>
       <td class="small mono">${esc(l.arquivo)}</td><td class="r">${acoes}</td></tr>`;
-  }).join("") : '<tr><td colspan="6" class="empty">Nenhum lote gerado ainda.</td></tr>';
+  }).join("") : '<tr><td colspan="7" class="empty">Nenhum lote gerado ainda.</td></tr>';
 }
 $("lRows").addEventListener("click", async e => {
   const b = e.target.closest("button"); if (!b) return;
